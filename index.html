@@ -44,7 +44,7 @@
         </div>
 
         <!-- DEEP DIVE: ETCD KEY-VALUE STORE -->
-        <div style="background-color:rgb(254,249,231);border:1.5px solid rgb(241,196,15);border-radius:8px;padding:18px;margin-bottom:25px;">
+        <div style="background-color:rgb(254,249,231);border:1.5px solid rgb(241,196,15);border-radius:8px;padding:18px;margin-bottom:15px;">
             <h4 style="margin-top:0;color:rgb(183,149,11);border-bottom:1px solid rgb(247,220,111);padding-bottom:6px;">
                 🔑 etcd Deep Dive</h4>
             <ul style="padding-left:18px;font-size:14px;margin-top:8px;margin-bottom:0;line-height:1.7;">
@@ -54,6 +54,21 @@
                 <li><strong>Cluster Deployment:</strong> Can run as a stacked static pod (e.g., <code>kube-system</code>) or as an external, dedicated etcd cluster. Default data directory is typically <code>/var/lib/etcd</code>.</li>
                 <li><strong>Security:</strong> All communication must be encrypted using TLS certificates to guarantee data confidentiality and integrity.</li>
                 <li><strong>Management Tool:</strong> Managed directly via the <code>etcdctl</code> command-line utility for snapshot backups, health checks, and key queries.</li>
+            </ul>
+        </div>
+
+        <!-- DEEP DIVE: KUBE-APISERVER -->
+        <div style="background-color:rgb(235,245,251);border:1.5px solid rgb(52,152,219);border-radius:8px;padding:18px;margin-bottom:25px;">
+            <h4 style="margin-top:0;color:rgb(31,97,141);border-bottom:1px solid rgb(174,214,241);padding-bottom:6px;">
+                🌐 kube-apiserver Deep Dive</h4>
+            <ul style="padding-left:18px;font-size:14px;margin-top:8px;margin-bottom:0;line-height:1.7;">
+                <li><strong>Primary Function:</strong> Orchestrates all operations within the Kubernetes cluster, acting as the central communication hub and entry point for all control plane and worker components.</li>
+                <li><strong>API Access & Management:</strong> Serves as the target interface for <code>kubectl</code> CLI commands and automated REST calls, handling CRUD operations on cluster resources.</li>
+                <li><strong>Data Interaction:</strong> Exclusively reads from and writes to <code>etcd</code> to persist cluster state changes, ensuring data consistency across the environment.</li>
+                <li><strong>Architectural Hub:</strong> Coordinates communication across Kubelets, the Scheduler, Controller Manager, and external controllers.</li>
+                <li><strong>Security Pipeline:</strong> Enforces security mechanisms on every request through three sequential gates: <strong>Authentication</strong>, <strong>Authorization</strong> (RBAC), and <strong>Admission Control</strong>.</li>
+                <li><strong>Scaling & Performance:</strong> Designed to scale horizontally. Multiple instances run stateless behind a load balancer to handle high traffic demands and ensure high availability.</li>
+                <li><strong>Versioning & Updates:</strong> Supports concurrent API versioning (e.g., <code>v1</code>, <code>v1beta1</code>) to allow smooth rolling upgrades and backward compatibility without service disruption.</li>
             </ul>
         </div>
 
