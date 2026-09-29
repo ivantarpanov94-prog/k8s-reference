@@ -58,7 +58,7 @@
         </div>
 
         <!-- DEEP DIVE: KUBE-APISERVER -->
-        <div style="background-color:rgb(235,245,251);border:1.5px solid rgb(52,152,219);border-radius:8px;padding:18px;margin-bottom:25px;">
+        <div style="background-color:rgb(235,245,251);border:1.5px solid rgb(52,152,219);border-radius:8px;padding:18px;margin-bottom:15px;">
             <h4 style="margin-top:0;color:rgb(31,97,141);border-bottom:1px solid rgb(174,214,241);padding-bottom:6px;">
                 🌐 kube-apiserver Deep Dive</h4>
             <ul style="padding-left:18px;font-size:14px;margin-top:8px;margin-bottom:0;line-height:1.7;">
@@ -69,6 +69,26 @@
                 <li><strong>Security Pipeline:</strong> Enforces security mechanisms on every request through three sequential gates: <strong>Authentication</strong>, <strong>Authorization</strong> (RBAC), and <strong>Admission Control</strong>.</li>
                 <li><strong>Scaling & Performance:</strong> Designed to scale horizontally. Multiple instances run stateless behind a load balancer to handle high traffic demands and ensure high availability.</li>
                 <li><strong>Versioning & Updates:</strong> Supports concurrent API versioning (e.g., <code>v1</code>, <code>v1beta1</code>) to allow smooth rolling upgrades and backward compatibility without service disruption.</li>
+            </ul>
+        </div>
+
+        <!-- DEEP DIVE: KUBE-CONTROLLER-MANAGER -->
+        <div style="background-color:rgb(245,238,248);border:1.5px solid rgb(155,89,182);border-radius:8px;padding:18px;margin-bottom:25px;">
+            <h4 style="margin-top:0;color:rgb(114,50,128);border-bottom:1px solid rgb(215,189,226);padding-bottom:6px;">
+                ⚙️ kube-controller-manager Deep Dive</h4>
+            <ul style="padding-left:18px;font-size:14px;margin-top:8px;margin-bottom:0;line-height:1.7;">
+                <li><strong>Role in Kubernetes:</strong> Manages various background control loops (controllers) that continuously regulate and drive the actual state of the cluster to match the desired state.</li>
+                <li><strong>Stateless State Management:</strong> Does not hold internal state or metadata; instead, it reads the intended state from <code>etcd</code> via the <code>kube-apiserver</code> and issues modifications to align the system.</li>
+                <li><strong>Key Controller Functions:</strong>
+                    <ul style="padding-left:18px;margin-top:4px;margin-bottom:4px;">
+                        <li><strong>Node Controller:</strong> Monitors node health via heartbeats, taking corrective action if nodes become unreachable.</li>
+                        <li><strong>Replication Controller:</strong> Maintains the exact requested count of pod replicas across the cluster.</li>
+                        <li><strong>Endpoints Controller:</strong> Populates Endpoints objects to link Kubernetes Services with corresponding target Pods.</li>
+                        <li><strong>Service Account & Token Controllers:</strong> Automates creation of default service accounts and API access tokens for new namespaces.</li>
+                    </ul>
+                </li>
+                <li><strong>REST API Interaction:</strong> Communicates exclusively with the <code>kube-apiserver</code> using REST endpoints to watch cluster state changes and issue corrective API updates.</li>
+                <li><strong>Leader Election:</strong> In multi-master High Availability setups, instances run in active-standby mode utilizing a leader election mechanism to ensure only one active manager drives decisions at a time.</li>
             </ul>
         </div>
 
