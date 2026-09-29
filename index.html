@@ -24,7 +24,7 @@
                 <p style="font-size:14px;margin-bottom:10px;"><strong>Role:</strong> Acts as the control center, managing overall operation and coordination of worker nodes.</p>
                 <strong style="font-size:14px;">Key Components:</strong>
                 <ul style="padding-left:18px;font-size:13px;margin-top:5px;margin-bottom:0;">
-                    <li><strong>etcd:</strong> Key-value store maintaining cluster state (nodes, containers, configuration).</li>
+                    <li><strong>etcd:</strong> Distributed key-value store maintaining all cluster data, state, and configuration.</li>
                     <li><strong>Kube API Server:</strong> Central management interface facilitating all communication and operations.</li>
                     <li><strong>Scheduler:</strong> Assigns pods to optimal nodes based on resources and constraints.</li>
                     <li><strong>Controllers:</strong> Operational background workers ensuring desired state (e.g., replication, node availability).</li>
@@ -43,6 +43,20 @@
             </div>
         </div>
 
+        <!-- DEEP DIVE: ETCD KEY-VALUE STORE -->
+        <div style="background-color:rgb(254,249,231);border:1.5px solid rgb(241,196,15);border-radius:8px;padding:18px;margin-bottom:25px;">
+            <h4 style="margin-top:0;color:rgb(183,149,11);border-bottom:1px solid rgb(247,220,111);padding-bottom:6px;">
+                🔑 etcd Deep Dive</h4>
+            <ul style="padding-left:18px;font-size:14px;margin-top:8px;margin-bottom:0;line-height:1.7;">
+                <li><strong>Role & Storage:</strong> Serves as the distributed key-value store for Kubernetes, holding all cluster state data, metadata, and configuration settings.</li>
+                <li><strong>Architecture:</strong> Operates via etcd server and client interactions, ensuring high availability and consistent data replication across the control plane.</li>
+                <li><strong>API Server Integration:</strong> The Kube API Server is the only component that communicates directly with etcd, connecting securely over TLS endpoints.</li>
+                <li><strong>Cluster Deployment:</strong> Can run as a stacked static pod (e.g., <code>kube-system</code>) or as an external, dedicated etcd cluster. Default data directory is typically <code>/var/lib/etcd</code>.</li>
+                <li><strong>Security:</strong> All communication must be encrypted using TLS certificates to guarantee data confidentiality and integrity.</li>
+                <li><strong>Management Tool:</strong> Managed directly via the <code>etcdctl</code> command-line utility for snapshot backups, health checks, and key queries.</li>
+            </ul>
+        </div>
+
         <div style="background-color:rgb(244,246,246);border-left:4px solid rgb(26,115,232);padding:12px 15px;border-radius:0 6px 6px 0;margin-bottom:30px;">
             <strong style="color:rgb(26,115,232);font-size:15px;">How Components Work Together:</strong>
             <ul style="padding-left:18px;font-size:14px;margin-top:8px;margin-bottom:0;">
@@ -53,7 +67,7 @@
             </ul>
         </div>
 
-        <!-- NEW TRAINING NOTES TEMPLATE SECTION -->
+        <!-- TRAINING NOTES SECTION -->
         <h3 style="color:rgb(26,115,232);border-bottom:2px solid rgb(240,240,240);padding-bottom:8px;margin-top:35px;">
             Training Notes</h3>
 
@@ -61,7 +75,7 @@
             <em>Ready for new notes. Add your training sections, commands, or key takeaways here.</em>
         </div>
 
-        <!-- COLLAPSIBLE REFERENCE ARCHIVE (Keeps old notes accessible without crowding) -->
+        <!-- COLLAPSIBLE REFERENCE ARCHIVE -->
         <details style="border:1px solid rgb(230,230,230);border-radius:6px;padding:10px 15px;background-color:rgb(253,253,253);cursor:pointer;">
             <summary style="font-weight:600;color:rgb(100,100,100);">📂 Reference Archive: Analogies & Basics (Click to expand)</summary>
             
