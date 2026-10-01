@@ -215,7 +215,6 @@
             </div>
             
             <svg class="diagram-svg" viewBox="0 0 760 410" xmlns="http://www.w3.org/2000/svg">
-                <!-- Background grid styling -->
                 <defs>
                     <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
                         <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.1"/>
@@ -294,20 +293,12 @@
                     <text x="640" y="295" fill="#ebf5fb" font-size="10" text-anchor="middle">(Helper Process)</text>
                 </g>
 
-                <!-- CONNECTING LINES WITH ARROWS -->
-                <!-- API Server <-> etcd -->
-                <path d="M 140 185 L 125 185 L 125 95 L 125 95" stroke="#34495e" stroke-width="2" fill="none"/>
-                <!-- API Server <-> Scheduler -->
+                <!-- CONNECTING LINES -->
+                <path d="M 140 185 L 125 185 L 125 95" stroke="#34495e" stroke-width="2" fill="none"/>
                 <path d="M 140 205 L 125 205" stroke="#34495e" stroke-width="2" fill="none"/>
-                <!-- API Server <-> Controller -->
-                <path d="M 140 225 L 125 225 L 125 320 L 125 320" stroke="#34495e" stroke-width="2" fill="none"/>
-
-                <!-- API Server <-> Kubelet -->
+                <path d="M 140 225 L 125 225 L 125 320" stroke="#34495e" stroke-width="2" fill="none"/>
                 <path d="M 270 180 L 340 180 L 340 95 L 420 95" stroke="#2980b9" stroke-width="2.5" fill="none"/>
-                
-                <!-- Kubelet -> Pods -->
                 <path d="M 485 130 L 485 180" stroke="#27ae60" stroke-width="2" fill="none" stroke-dasharray="3,3"/>
-                <!-- Kube Proxy -> Pod Networking -->
                 <path d="M 655 130 L 655 180" stroke="#8e44ad" stroke-width="2" fill="none" stroke-dasharray="3,3"/>
             </svg>
         </div>
@@ -498,14 +489,8 @@
             const element = document.getElementById(sectionId);
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
-                // Remove previous highlight class if active
                 element.classList.remove('card-highlight');
-                
-                // Trigger reflow to restart animation
                 void element.offsetWidth;
-                
-                // Add highlight class
                 element.classList.add('card-highlight');
             }
         }
