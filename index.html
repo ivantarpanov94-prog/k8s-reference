@@ -5,531 +5,479 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kubernetes Reference & Training Notes</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['Fira Code', 'monospace'],
-                    },
-                    colors: {
-                        k8s: {
-                            blue: '#326CE5',
-                            darkblue: '#1B4CB0',
-                            lightbg: '#F8FAFC',
-                            cardbg: '#FFFFFF',
-                        },
-                        master: {
-                            border: '#D97706',
-                            bg: '#FFFBEB',
-                            text: '#92400E',
-                        },
-                        worker: {
-                            border: '#2563EB',
-                            bg: '#EFF6FF',
-                            text: '#1E40AF',
-                        },
-                        etcd: {
-                            bg: '#FEF9C3',
-                            border: '#EAB308',
-                            text: '#854D0E',
-                        },
-                        apiserver: {
-                            bg: '#E0F2FE',
-                            border: '#0284C7',
-                            text: '#075985',
-                        },
-                        controller: {
-                            bg: '#F3E8FF',
-                            border: '#A855F7',
-                            text: '#6B21A8',
-                        },
-                        scheduler: {
-                            bg: '#DCFCE7',
-                            border: '#22C55E',
-                            text: '#166534',
-                        },
-                        kubelet: {
-                            bg: '#CCFBF1',
-                            border: '#14B8A6',
-                            text: '#115E59',
-                        },
-                        kubeproxy: {
-                            bg: '#E0E7FF',
-                            border: '#6366F1',
-                            text: '#3730A3',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
     <style>
-        .diagram-node {
+        :root {
+            --primary: #1a73e8;
+            --control-plane-bg: #fdf2e9;
+            --control-plane-border: #d35400;
+            --control-plane-text: #a04000;
+            --worker-bg: #ebf5fb;
+            --worker-border: #2980b9;
+            --worker-text: #1f618d;
+            --etcd-border: #f1c40f;
+            --etcd-bg: #fef9e7;
+            --apiserver-border: #3498db;
+            --apiserver-bg: #ebf5fb;
+            --controller-border: #9b59b6;
+            --controller-bg: #f5eef8;
+            --scheduler-border: #e67e22;
+            --scheduler-bg: #fbeee6;
+            --kubelet-border: #27ae60;
+            --kubelet-bg: #eaf2f8;
+            --kubeproxy-border: #8e44ad;
+            --kubeproxy-bg: #f4ecf7;
+            --pod-border: #16a085;
+            --pod-bg: #e8f8f5;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            max-width: 850px;
+            margin: 40px auto;
+            line-height: 1.6;
+            font-size: 16px;
+            color: #333333;
+            padding: 0 20px;
+            background-color: #fafdff;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e1e8ed;
+        }
+
+        h2, h3, h4 {
+            margin-top: 0;
+        }
+
+        .main-title {
+            color: var(--primary);
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        .section-title {
+            color: var(--primary);
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 8px;
+            margin-top: 30px;
+        }
+
+        /* SVG Architecture Diagram Styles */
+        .diagram-container {
+            width: 100%;
+            background: #f8fafc;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 15px;
+            box-sizing: border-box;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .diagram-svg {
+            width: 100%;
+            height: auto;
+            max-width: 780px;
+        }
+
+        .interactive-node {
             cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.25s ease;
         }
-        .diagram-node:hover {
-            transform: translateY(-2px);
-            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.15));
-        }
-        .diagram-node:hover rect, .diagram-node:hover circle {
+
+        .interactive-node:hover rect,
+        .interactive-node:hover circle {
+            filter: drop-shadow(0px 0px 6px rgba(26, 115, 232, 0.6));
             stroke-width: 2.5px;
         }
-        .pulse-line {
-            stroke-dasharray: 6, 6;
-            animation: dash 20s linear infinite;
+
+        .interactive-node:hover text {
+            font-weight: bold;
         }
-        @keyframes dash {
-            to {
-                stroke-dashoffset: -100;
-            }
+
+        /* Highlight animation when jumping to deep dive */
+        .card-highlight {
+            animation: highlightGlow 2s ease-out;
         }
-        .highlight-card {
-            animation: cardGlow 2s ease-in-out infinite alternate;
-        }
-        @keyframes cardGlow {
+
+        @keyframes highlightGlow {
             0% {
-                box-shadow: 0 0 0 3px rgba(50, 108, 229, 0.4), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.6);
                 transform: scale(1.01);
             }
             100% {
-                box-shadow: 0 0 0 6px rgba(50, 108, 229, 0.7), 0 20px 25px -5px rgba(0, 0, 0, 0.15);
-                transform: scale(1.015);
+                box-shadow: 0 0 0 0px rgba(26, 115, 232, 0);
+                transform: scale(1);
             }
         }
-        details summary::-webkit-details-marker {
-            display: none;
+
+        .deep-dive-card {
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 18px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .deep-dive-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Card specific styles */
+        .card-etcd { background-color: var(--etcd-bg); border: 1.5px solid var(--etcd-border); }
+        .card-apiserver { background-color: var(--apiserver-bg); border: 1.5px solid var(--apiserver-border); }
+        .card-controller { background-color: var(--controller-bg); border: 1.5px solid var(--controller-border); }
+        .card-scheduler { background-color: var(--scheduler-bg); border: 1.5px solid var(--scheduler-border); }
+        .card-kubelet { background-color: var(--kubelet-bg); border: 1.5px solid var(--kubelet-border); }
+        .card-kubeproxy { background-color: var(--kubeproxy-bg); border: 1.5px solid var(--kubeproxy-border); }
+        .card-pod { background-color: var(--pod-bg); border: 1.5px solid var(--pod-border); }
+
+        .card-header-etcd { color: #b7950b; border-bottom: 1px solid #f7dc6f; }
+        .card-header-apiserver { color: #1f618d; border-bottom: 1px solid #aed6f1; }
+        .card-header-controller { color: #723280; border-bottom: 1px solid #d7bde2; }
+        .card-header-scheduler { color: #a04000; border-bottom: 1px solid #f5cba7; }
+        .card-header-kubelet { color: #1e8449; border-bottom: 1px solid #a9dfbf; }
+        .card-header-kubeproxy { color: #6c3483; border-bottom: 1px solid #d2b4de; }
+        .card-header-pod { color: #117864; border-bottom: 1px solid #a3e4d7; }
+
+        ul.card-list {
+            padding-left: 18px;
+            font-size: 14px;
+            margin-top: 8px;
+            margin-bottom: 0;
+            line-height: 1.7;
+        }
+
+        .hint-banner {
+            background-color: #e8f4f8;
+            border-left: 4px solid var(--primary);
+            padding: 10px 14px;
+            border-radius: 4px;
+            font-size: 13.5px;
+            margin-bottom: 20px;
+            color: #1a5276;
+        }
+
+        .summary-flex {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .summary-box {
+            flex: 1;
+            min-width: 280px;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .summary-master {
+            background-color: var(--control-plane-bg);
+            border: 1.5px solid var(--control-plane-border);
+        }
+
+        .summary-worker {
+            background-color: var(--worker-bg);
+            border: 1.5px solid var(--worker-border);
+        }
+
+        details summary {
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+        }
+
+        pre {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            overflow-x: auto;
         }
     </style>
 </head>
 
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+<body>
+    <div class="container">
 
-    <div class="max-w-5xl mx-auto space-y-8">
-        
-        <!-- HEADER -->
-        <header class="bg-white rounded-xl p-6 sm:p-8 shadow-sm border border-slate-200">
-            <div class="flex items-center space-x-4 mb-2">
-                <svg class="w-10 h-10 text-k8s-blue" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M11.393 1.282a1.2 1.2 0 0 1 1.214 0l8.75 5.052a1.2 1.2 0 0 1 .6.104 1.2 1.2 0 0 1 .6 1.039v10.106a1.2 1.2 0 0 1-.6 1.04l-8.75 5.051a1.2 1.2 0 0 1-1.214 0l-8.75-5.051a1.2 1.2 0 0 1-.6-1.04V7.477a1.2 1.2 0 0 1 .6-1.04l8.75-5.052zM12 3.125L4.5 7.456v8.663L12 20.45l7.5-4.331V7.456L12 3.125z"/>
-                </svg>
-                <div>
-                    <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Kubernetes Reference & Training Notes</h1>
-                    <p class="text-sm text-slate-500 font-medium mt-0.5">Interactive Cluster Architecture & Deep Dive Guide</p>
-                </div>
+        <h2 class="main-title">Kubernetes Reference & Training Notes</h2>
+
+        <!-- INTERACTIVE SVG DIAGRAM -->
+        <div class="diagram-container">
+            <div class="hint-banner">
+                💡 <strong>Interactive Diagram:</strong> Click any component box below to automatically jump to its detailed Deep Dive section!
             </div>
-        </header>
+            
+            <svg class="diagram-svg" viewBox="0 0 760 410" xmlns="http://www.w3.org/2000/svg">
+                <!-- Background grid styling -->
+                <defs>
+                    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+                        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.1"/>
+                    </filter>
+                </defs>
 
-        <!-- INTERACTIVE SVG ARCHITECTURE DIAGRAM -->
-        <section class="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-slate-200 space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
-                <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                    <span class="inline-block w-3 h-3 rounded-full bg-k8s-blue"></span>
-                    Interactive Architecture Map
-                </h2>
-                <p class="text-xs text-slate-500 italic">💡 Click any component to jump directly to its detailed breakdown below</p>
-            </div>
+                <!-- MASTER NODE BOUNDARY -->
+                <rect x="10" y="10" width="360" height="385" rx="10" fill="#fdf2e9" stroke="#d35400" stroke-width="2" stroke-dasharray="6,4"/>
+                <text x="25" y="32" fill="#a04000" font-weight="bold" font-size="14">Master Node (Control Plane)</text>
 
-            <div class="w-full overflow-x-auto bg-slate-900 rounded-lg p-2 sm:p-4 shadow-inner">
-                <svg viewBox="0 0 960 520" class="w-full h-auto min-w-[700px] select-none">
-                    <defs>
-                        <!-- Glow filter -->
-                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                            <feGaussianBlur stdDeviation="3" result="blur" />
-                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                        </filter>
-                        
-                        <!-- Arrowhead markers -->
-                        <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#94A3B8" />
-                        </marker>
-                        <marker id="arrow-blue" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#38BDF8" />
-                        </marker>
-                    </defs>
+                <!-- WORKER NODE BOUNDARY -->
+                <rect x="390" y="10" width="360" height="385" rx="10" fill="#ebf5fb" stroke="#2980b9" stroke-width="2" stroke-dasharray="6,4"/>
+                <text x="405" y="32" fill="#1f618d" font-weight="bold" font-size="14">Worker Node</text>
 
-                    <!-- BACKGROUND CONTAINER GRID -->
-                    <!-- Master Node Box -->
-                    <rect x="20" y="20" width="440" height="480" rx="12" fill="#1E293B" stroke="#F59E0B" stroke-width="2" stroke-dasharray="4 4" />
-                    <text x="40" y="50" fill="#FBBF24" font-family="Inter" font-weight="700" font-size="16">MASTER NODE (Control Plane)</text>
-                    <text x="40" y="68" fill="#94A3B8" font-family="Inter" font-size="11">Manages cluster state, scheduling & operations</text>
-
-                    <!-- Worker Node Box -->
-                    <rect x="500" y="20" width="440" height="480" rx="12" fill="#1E293B" stroke="#3B82F6" stroke-width="2" stroke-dasharray="4 4" />
-                    <text x="520" y="50" fill="#60A5FA" font-family="Inter" font-weight="700" font-size="16">WORKER NODE</text>
-                    <text x="520" y="68" fill="#94A3B8" font-family="Inter" font-size="11">Executes application container workloads</text>
-
-                    <!-- CONNECTIONS / FLOW PIPELINES -->
-                    <!-- etcd <-> API Server -->
-                    <path d="M 160 210 L 220 210" stroke="#38BDF8" stroke-width="2.5" class="pulse-line" marker-end="url(#arrow-blue)" marker-start="url(#arrow-blue)"/>
-                    
-                    <!-- Scheduler <-> API Server -->
-                    <path d="M 160 320 L 240 320 L 240 280" stroke="#94A3B8" stroke-width="2" class="pulse-line" marker-end="url(#arrow)" />
-                    
-                    <!-- Controller Manager <-> API Server -->
-                    <path d="M 160 410 L 280 410 L 280 280" stroke="#94A3B8" stroke-width="2" class="pulse-line" marker-end="url(#arrow)" />
-
-                    <!-- API Server <-> Kubelet -->
-                    <path d="M 380 210 L 540 210" stroke="#38BDF8" stroke-width="3" class="pulse-line" marker-end="url(#arrow-blue)" marker-start="url(#arrow-blue)"/>
-                    <text x="460" y="200" fill="#38BDF8" font-family="Inter" font-size="10" font-weight="600" text-anchor="middle">HTTPS / gRPC Watch</text>
-
-                    <!-- API Server <-> Kube-Proxy -->
-                    <path d="M 380 240 L 480 240 L 480 370 L 540 370" stroke="#94A3B8" stroke-width="2" class="pulse-line" marker-end="url(#arrow)" />
-
-                    <!-- Kubelet <-> Container Runtime -->
-                    <path d="M 640 250 L 640 310" stroke="#2DD4BF" stroke-width="2" marker-end="url(#arrow)"/>
-                    <text x="648" y="285" fill="#2DD4BF" font-family="Fira Code" font-size="9">CRI (gRPC)</text>
-
-                    <!-- Kubelet <-> Pods -->
-                    <path d="M 740 210 L 780 210" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow)"/>
-
-                    <!-- COMPONENTS (Interactive Groups) -->
-
-                    <!-- ETCD -->
-                    <g class="diagram-node" onclick="scrollToSection('etcd-section')">
-                        <rect x="40" y="160" width="120" height="100" rx="8" fill="#854D0E" stroke="#EAB308" stroke-width="1.5" />
-                        <text x="100" y="195" fill="#FEF08A" font-family="Inter" font-weight="700" font-size="14" text-anchor="middle">etcd</text>
-                        <text x="100" y="215" fill="#FEF9C3" font-family="Inter" font-size="10" text-anchor="middle">Key-Value Store</text>
-                        <text x="100" y="235" fill="#FDE047" font-family="Inter" font-size="9" text-anchor="middle">Cluster State</text>
-                    </g>
-
-                    <!-- KUBE-APISERVER -->
-                    <g class="diagram-node" onclick="scrollToSection('apiserver-section')">
-                        <rect x="220" y="140" width="160" height="140" rx="8" fill="#0369A1" stroke="#38BDF8" stroke-width="2" />
-                        <text x="300" y="180" fill="#E0F2FE" font-family="Inter" font-weight="700" font-size="15" text-anchor="middle">kube-apiserver</text>
-                        <text x="300" y="202" fill="#BAE6FD" font-family="Inter" font-size="11" text-anchor="middle">Central Hub & Gatekeeper</text>
-                        <text x="300" y="225" fill="#7DD3FC" font-family="Inter" font-size="9" text-anchor="middle">Auth, Authz, Admission</text>
-                        <text x="300" y="245" fill="#38BDF8" font-family="Fira Code" font-size="9" text-anchor="middle">REST / kubectl</text>
-                    </g>
-
-                    <!-- SCHEDULER -->
-                    <g class="diagram-node" onclick="scrollToSection('master-section')">
-                        <rect x="40" y="280" width="120" height="80" rx="8" fill="#15803D" stroke="#4ADE80" stroke-width="1.5" />
-                        <text x="100" y="315" fill="#DCFCE7" font-family="Inter" font-weight="700" font-size="13" text-anchor="middle">kube-scheduler</text>
-                        <text x="100" y="335" fill="#86EFAC" font-family="Inter" font-size="10" text-anchor="middle">Pod Placement</text>
-                    </g>
-
-                    <!-- CONTROLLER MANAGER -->
-                    <g class="diagram-node" onclick="scrollToSection('controller-section')">
-                        <rect x="40" y="380" width="120" height="80" rx="8" fill="#6B21A8" stroke="#C084FC" stroke-width="1.5" />
-                        <text x="100" y="410" fill="#F3E8FF" font-family="Inter" font-weight="700" font-size="12" text-anchor="middle">controller-</text>
-                        <text x="100" y="425" fill="#F3E8FF" font-family="Inter" font-weight="700" font-size="12" text-anchor="middle">manager</text>
-                        <text x="100" y="445" fill="#E9D5FF" font-family="Inter" font-size="9" text-anchor="middle">Control Loops</text>
-                    </g>
-
-                    <!-- KUBELET -->
-                    <g class="diagram-node" onclick="scrollToSection('worker-section')">
-                        <rect x="540" y="160" width="200" height="90" rx="8" fill="#0F766E" stroke="#2DD4BF" stroke-width="2" />
-                        <text x="640" y="195" fill="#CCFBF1" font-family="Inter" font-weight="700" font-size="15" text-anchor="middle">kubelet</text>
-                        <text x="640" y="215" fill="#99F6E4" font-family="Inter" font-size="11" text-anchor="middle">"Captain on Ship"</text>
-                        <text x="640" y="232" fill="#5EEAD4" font-family="Inter" font-size="9" text-anchor="middle">Node Agent & Health Reporter</text>
-                    </g>
-
-                    <!-- CONTAINER RUNTIME -->
-                    <g class="diagram-node" onclick="scrollToSection('worker-section')">
-                        <rect x="540" y="310" width="200" height="70" rx="8" fill="#1E293B" stroke="#64748B" stroke-width="1.5" />
-                        <text x="640" y="338" fill="#F1F5F9" font-family="Inter" font-weight="600" font-size="12" text-anchor="middle">Container Runtime</text>
-                        <text x="640" y="355" fill="#94A3B8" font-family="Fira Code" font-size="10" text-anchor="middle">(containerd / CRI-O)</text>
-                    </g>
-
-                    <!-- KUBE PROXY -->
-                    <g class="diagram-node" onclick="scrollToSection('worker-section')">
-                        <rect x="540" y="400" width="200" height="60" rx="8" fill="#3730A3" stroke="#818CF8" stroke-width="1.5" />
-                        <text x="640" y="428" fill="#E0E7FF" font-family="Inter" font-weight="700" font-size="13" text-anchor="middle">kube-proxy</text>
-                        <text x="640" y="445" fill="#C7D2FE" font-family="Inter" font-size="10" text-anchor="middle">Network Rules & Services</text>
-                    </g>
-
-                    <!-- PODS / CONTAINERS -->
-                    <g class="diagram-node" onclick="scrollToSection('worker-section')">
-                        <rect x="780" y="140" width="130" height="320" rx="8" fill="#0F172A" stroke="#475569" stroke-width="1.5" />
-                        <text x="845" y="168" fill="#94A3B8" font-family="Inter" font-weight="700" font-size="13" text-anchor="middle">PODS</text>
-                        
-                        <!-- Pod 1 -->
-                        <rect x="795" y="185" width="100" height="75" rx="6" fill="#1E293B" stroke="#3B82F6" stroke-width="1" />
-                        <text x="845" y="205" fill="#60A5FA" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">Pod A</text>
-                        <rect x="805" y="215" width="35" height="30" rx="3" fill="#2563EB" />
-                        <rect x="850" y="215" width="35" height="30" rx="3" fill="#0284C7" />
-
-                        <!-- Pod 2 -->
-                        <rect x="795" y="275" width="100" height="75" rx="6" fill="#1E293B" stroke="#10B981" stroke-width="1" />
-                        <text x="845" y="295" fill="#34D399" font-family="Inter" font-size="11" font-weight="600" text-anchor="middle">Pod B</text>
-                        <rect x="805" y="305" width="80" height="30" rx="3" fill="#059669" />
-
-                        <text x="845" y="380" fill="#64748B" font-family="Inter" font-size="10" text-anchor="middle">Running Containers</text>
-                    </g>
-                </svg>
-            </div>
-        </section>
-
-        <!-- CORE SECTION: CLUSTER ARCHITECTURE -->
-        <section id="master-section" class="space-y-4">
-            <h2 class="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2">
-                Cluster Architecture: Master vs. Worker
-            </h2>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- MASTER COMPONENTS -->
                 
-                <!-- Master Node Box -->
-                <div class="bg-amber-50/60 border-2 border-amber-500/80 rounded-xl p-5 shadow-sm space-y-3 transition-all duration-300">
-                    <div class="border-b border-amber-200/80 pb-2">
-                        <h3 class="text-lg font-bold text-amber-900">Master Node (Control Plane)</h3>
-                        <p class="text-xs text-amber-800/90 mt-1">
-                            <strong class="font-semibold">Role:</strong> Acts as the control center, managing overall operation and coordination of worker nodes.
-                        </p>
-                    </div>
-                    <div>
-                        <strong class="text-xs uppercase tracking-wider text-amber-900/80 font-bold block mb-2">Key Components:</strong>
-                        <ul class="space-y-2 text-xs sm:text-sm text-amber-950">
-                            <li class="flex items-start gap-1.5">
-                                <span class="text-amber-600 font-bold">•</span>
-                                <span><strong class="font-semibold">etcd:</strong> Key-value store maintaining cluster state (nodes, containers, configuration).</span>
-                            </li>
-                            <li class="flex items-start gap-1.5">
-                                <span class="text-amber-600 font-bold">•</span>
-                                <span><strong class="font-semibold">Kube API Server:</strong> Central management interface facilitating all communication and operations.</span>
-                            </li>
-                            <li class="flex items-start gap-1.5">
-                                <span class="text-amber-600 font-bold">•</span>
-                                <span><strong class="font-semibold">Scheduler:</strong> Assigns pods to optimal nodes based on resources and constraints.</span>
-                            </li>
-                            <li class="flex items-start gap-1.5">
-                                <span class="text-amber-600 font-bold">•</span>
-                                <span><strong class="font-semibold">Controllers:</strong> Operational background workers ensuring desired state (e.g., replication, node availability).</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+                <!-- API Server (HUB) -->
+                <g class="interactive-node" onclick="scrollToSection('apiserver-section')">
+                    <rect x="140" y="160" width="130" height="90" rx="8" fill="#3498db" stroke="#1f618d" stroke-width="2" filter="url(#shadow)"/>
+                    <text x="205" y="200" fill="white" font-weight="bold" font-size="13" text-anchor="middle">Kube API</text>
+                    <text x="205" y="218" fill="white" font-weight="bold" font-size="13" text-anchor="middle">Server</text>
+                    <text x="205" y="238" fill="#d4efdf" font-size="10" text-anchor="middle">🌐 Central Hub</text>
+                </g>
 
-                <!-- Worker Node Box -->
-                <div id="worker-section" class="bg-blue-50/60 border-2 border-blue-500/80 rounded-xl p-5 shadow-sm space-y-3 transition-all duration-300">
-                    <div class="border-b border-blue-200/80 pb-2">
-                        <h3 class="text-lg font-bold text-blue-900">Worker Node</h3>
-                        <p class="text-xs text-blue-800/90 mt-1">
-                            <strong class="font-semibold">Role:</strong> Responsible for running application containers and executing workloads assigned by the master node.
-                        </p>
-                    </div>
-                    <div>
-                        <strong class="text-xs uppercase tracking-wider text-blue-900/80 font-bold block mb-2">Key Components:</strong>
-                        <ul class="space-y-2 text-xs sm:text-sm text-blue-950">
-                            <li class="flex items-start gap-1.5">
-                                <span class="text-blue-600 font-bold">•</span>
-                                <span><strong class="font-semibold">Kubelet:</strong> The "captain on ship"—manages container lifecycle and reports status back to Kube API Server.</span>
-                            </li>
-                            <li class="flex items-start gap-1.5">
-                                <span class="text-blue-600 font-bold">•</span>
-                                <span><strong class="font-semibold">Kube Proxy:</strong> Manages networking rules for seamless communication between containers and external traffic.</span>
-                            </li>
-                            <li class="flex items-start gap-1.5">
-                                <span class="text-blue-600 font-bold">•</span>
-                                <span><strong class="font-semibold">Container Runtime:</strong> Executes containers (e.g., containerd, CRI-O) under Kubelet's direction via CRI.</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+                <!-- etcd -->
+                <g class="interactive-node" onclick="scrollToSection('etcd-section')">
+                    <rect x="25" y="60" width="100" height="70" rx="8" fill="#f1c40f" stroke="#b7950b" stroke-width="2" filter="url(#shadow)"/>
+                    <text x="75" y="95" fill="#5b4705" font-weight="bold" font-size="13" text-anchor="middle">etcd</text>
+                    <text x="75" y="112" fill="#7d6608" font-size="10" text-anchor="middle">🔑 Key-Value Store</text>
+                </g>
 
-            </div>
-        </section>
+                <!-- Scheduler -->
+                <g class="interactive-node" onclick="scrollToSection('scheduler-section')">
+                    <rect x="25" y="170" width="100" height="70" rx="8" fill="#e67e22" stroke="#a04000" stroke-width="2" filter="url(#shadow)"/>
+                    <text x="75" y="202" fill="white" font-weight="bold" font-size="12" text-anchor="middle">Scheduler</text>
+                    <text x="75" y="220" fill="#fdebd0" font-size="10" text-anchor="middle">⚙️ Pod Placement</text>
+                </g>
 
-        <!-- DEEP DIVES SECTION -->
-        <section class="space-y-4">
-            <h2 class="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2">
-                Component Deep Dives
-            </h2>
+                <!-- Controllers -->
+                <g class="interactive-node" onclick="scrollToSection('controller-section')">
+                    <rect x="25" y="280" width="100" height="80" rx="8" fill="#9b59b6" stroke="#6c3483" stroke-width="2" filter="url(#shadow)"/>
+                    <text x="75" y="312" fill="white" font-weight="bold" font-size="12" text-anchor="middle">Controller</text>
+                    <text x="75" y="328" fill="white" font-weight="bold" font-size="12" text-anchor="middle">Manager</text>
+                    <text x="75" y="346" fill="#f5eef8" font-size="10" text-anchor="middle">⚙️ Desired State</text>
+                </g>
 
-            <!-- ETCD DEEP DIVE -->
-            <div id="etcd-section" class="bg-yellow-50/80 border-2 border-yellow-400/80 rounded-xl p-5 shadow-sm space-y-3 transition-all duration-300">
-                <div class="flex items-center gap-2 border-b border-yellow-200/80 pb-2">
-                    <span class="text-xl">🔑</span>
-                    <h3 class="text-lg font-bold text-yellow-900">etcd Deep Dive</h3>
-                </div>
-                <ul class="space-y-2 text-xs sm:text-sm text-yellow-950 leading-relaxed">
-                    <li class="flex items-start gap-2">
-                        <span class="text-yellow-600 font-bold">▪</span>
-                        <span><strong>Role & Storage:</strong> Serves as the distributed key-value store for Kubernetes, holding all cluster state data, metadata, and configuration settings.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-yellow-600 font-bold">▪</span>
-                        <span><strong>Architecture:</strong> Operates via etcd server and client interactions, ensuring high availability and consistent data replication across the control plane.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-yellow-600 font-bold">▪</span>
-                        <span><strong>API Server Integration:</strong> The Kube API Server is the only component that communicates directly with etcd, connecting securely over TLS endpoints.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-yellow-600 font-bold">▪</span>
-                        <span><strong>Cluster Deployment:</strong> Can run as a stacked static pod (e.g., <code class="bg-yellow-200/70 px-1.5 py-0.5 rounded text-yellow-900 font-mono text-xs">kube-system</code>) or as an external, dedicated etcd cluster. Default data directory is typically <code class="bg-yellow-200/70 px-1.5 py-0.5 rounded text-yellow-900 font-mono text-xs">/var/lib/etcd</code>.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-yellow-600 font-bold">▪</span>
-                        <span><strong>Security:</strong> All communication must be encrypted using TLS certificates to guarantee data confidentiality and integrity.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-yellow-600 font-bold">▪</span>
-                        <span><strong>Management Tool:</strong> Managed directly via the <code class="bg-yellow-200/70 px-1.5 py-0.5 rounded text-yellow-900 font-mono text-xs">etcdctl</code> command-line utility for snapshot backups, health checks, and key queries.</span>
-                    </li>
+                <!-- WORKER COMPONENTS -->
+
+                <!-- Kubelet -->
+                <g class="interactive-node" onclick="scrollToSection('kubelet-section')">
+                    <rect x="420" y="60" width="130" height="70" rx="8" fill="#27ae60" stroke="#1e8449" stroke-width="2" filter="url(#shadow)"/>
+                    <text x="485" y="95" fill="white" font-weight="bold" font-size="13" text-anchor="middle">Kubelet</text>
+                    <text x="485" y="112" fill="#d4efdf" font-size="10" text-anchor="middle">🪖 Node Agent</text>
+                </g>
+
+                <!-- Kube Proxy -->
+                <g class="interactive-node" onclick="scrollToSection('kubeproxy-section')">
+                    <rect x="590" y="60" width="130" height="70" rx="8" fill="#8e44ad" stroke="#6c3483" stroke-width="2" filter="url(#shadow)"/>
+                    <text x="655" y="95" fill="white" font-weight="bold" font-size="13" text-anchor="middle">Kube Proxy</text>
+                    <text x="655" y="112" fill="#ebdef0" font-size="10" text-anchor="middle">🔀 Network Rules</text>
+                </g>
+
+                <!-- Pod Box / Workloads -->
+                <g class="interactive-node" onclick="scrollToSection('pod-section')">
+                    <rect x="420" y="180" width="300" height="180" rx="10" fill="#e8f8f5" stroke="#16a085" stroke-width="2" stroke-dasharray="4,2"/>
+                    <text x="570" y="205" fill="#117864" font-weight="bold" font-size="13" text-anchor="middle">📦 Pods & Container Workloads</text>
+                    
+                    <!-- Inner Container 1 -->
+                    <rect x="440" y="220" width="120" height="120" rx="6" fill="#16a085" opacity="0.85"/>
+                    <text x="500" y="275" fill="white" font-size="12" font-weight="bold" text-anchor="middle">Container 1</text>
+                    <text x="500" y="295" fill="#e8f8f5" font-size="10" text-anchor="middle">(App Engine)</text>
+
+                    <!-- Inner Container 2 -->
+                    <rect x="580" y="220" width="120" height="120" rx="6" fill="#1b4f72" opacity="0.85"/>
+                    <text x="640" y="275" fill="white" font-size="12" font-weight="bold" text-anchor="middle">Container 2</text>
+                    <text x="640" y="295" fill="#ebf5fb" font-size="10" text-anchor="middle">(Helper Process)</text>
+                </g>
+
+                <!-- CONNECTING LINES WITH ARROWS -->
+                <!-- API Server <-> etcd -->
+                <path d="M 140 185 L 125 185 L 125 95 L 125 95" stroke="#34495e" stroke-width="2" fill="none"/>
+                <!-- API Server <-> Scheduler -->
+                <path d="M 140 205 L 125 205" stroke="#34495e" stroke-width="2" fill="none"/>
+                <!-- API Server <-> Controller -->
+                <path d="M 140 225 L 125 225 L 125 320 L 125 320" stroke="#34495e" stroke-width="2" fill="none"/>
+
+                <!-- API Server <-> Kubelet -->
+                <path d="M 270 180 L 340 180 L 340 95 L 420 95" stroke="#2980b9" stroke-width="2.5" fill="none"/>
+                
+                <!-- Kubelet -> Pods -->
+                <path d="M 485 130 L 485 180" stroke="#27ae60" stroke-width="2" fill="none" stroke-dasharray="3,3"/>
+                <!-- Kube Proxy -> Pod Networking -->
+                <path d="M 655 130 L 655 180" stroke="#8e44ad" stroke-width="2" fill="none" stroke-dasharray="3,3"/>
+            </svg>
+        </div>
+
+        <!-- CORE SECTION: Cluster Architecture -->
+        <h3 class="section-title">Cluster Architecture: Master vs. Worker</h3>
+
+        <div class="summary-flex">
+            <div class="summary-box summary-master">
+                <h4 style="color:#a04000;border-bottom:1px solid #f5cba7;padding-bottom:6px;">
+                    Master Node (Control Plane)</h4>
+                <p style="font-size:14px;margin-bottom:10px;"><strong>Role:</strong> Acts as the control center, managing overall operation and coordination of worker nodes.</p>
+                <strong style="font-size:14px;">Key Components:</strong>
+                <ul style="padding-left:18px;font-size:13px;margin-top:5px;margin-bottom:0;">
+                    <li><strong>etcd:</strong> Distributed key-value store maintaining all cluster data, state, and configuration.</li>
+                    <li><strong>Kube API Server:</strong> Central management interface facilitating all communication and operations.</li>
+                    <li><strong>Scheduler:</strong> Assigns pods to optimal nodes based on resources and constraints.</li>
+                    <li><strong>Controllers:</strong> Operational background workers ensuring desired state (e.g., replication, node availability).</li>
                 </ul>
             </div>
 
-            <!-- KUBE-APISERVER DEEP DIVE -->
-            <div id="apiserver-section" class="bg-sky-50/80 border-2 border-sky-400/80 rounded-xl p-5 shadow-sm space-y-3 transition-all duration-300">
-                <div class="flex items-center gap-2 border-b border-sky-200/80 pb-2">
-                    <span class="text-xl">🌐</span>
-                    <h3 class="text-lg font-bold text-sky-900">kube-apiserver Deep Dive</h3>
-                </div>
-                <ul class="space-y-2 text-xs sm:text-sm text-sky-950 leading-relaxed">
-                    <li class="flex items-start gap-2">
-                        <span class="text-sky-600 font-bold">▪</span>
-                        <span><strong>Primary Function:</strong> Orchestrates all operations within the Kubernetes cluster, acting as the central communication hub and entry point for all control plane and worker components.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-sky-600 font-bold">▪</span>
-                        <span><strong>API Access & Management:</strong> Serves as the target interface for <code class="bg-sky-200/70 px-1.5 py-0.5 rounded text-sky-900 font-mono text-xs">kubectl</code> CLI commands and automated REST calls, handling CRUD operations on cluster resources.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-sky-600 font-bold">▪</span>
-                        <span><strong>Data Interaction:</strong> Exclusively reads from and writes to <code class="bg-sky-200/70 px-1.5 py-0.5 rounded text-sky-900 font-mono text-xs">etcd</code> to persist cluster state changes, ensuring data consistency across the environment.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-sky-600 font-bold">▪</span>
-                        <span><strong>Architectural Hub:</strong> Coordinates communication across Kubelets, the Scheduler, Controller Manager, and external controllers.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-sky-600 font-bold">▪</span>
-                        <span><strong>Security Pipeline:</strong> Enforces security mechanisms on every request through three sequential gates: <strong>Authentication</strong>, <strong>Authorization</strong> (RBAC), and <strong>Admission Control</strong>.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-sky-600 font-bold">▪</span>
-                        <span><strong>Scaling & Performance:</strong> Designed to scale horizontally. Multiple instances run stateless behind a load balancer to handle high traffic demands and ensure high availability.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-sky-600 font-bold">▪</span>
-                        <span><strong>Versioning & Updates:</strong> Supports concurrent API versioning (e.g., <code class="bg-sky-200/70 px-1.5 py-0.5 rounded text-sky-900 font-mono text-xs">v1</code>, <code class="bg-sky-200/70 px-1.5 py-0.5 rounded text-sky-900 font-mono text-xs">v1beta1</code>) to allow smooth rolling upgrades and backward compatibility without service disruption.</span>
-                    </li>
+            <div class="summary-box summary-worker">
+                <h4 style="color:#1f618d;border-bottom:1px solid #a9cce3;padding-bottom:6px;">
+                    Worker Node</h4>
+                <p style="font-size:14px;margin-bottom:10px;"><strong>Role:</strong> Responsible for running application containers and executing workloads assigned by the master node.</p>
+                <strong style="font-size:14px;">Key Components:</strong>
+                <ul style="padding-left:18px;font-size:13px;margin-top:5px;margin-bottom:0;">
+                    <li><strong>Kubelet:</strong> The "captain on ship"—manages container lifecycle and reports status back to Kube API Server.</li>
+                    <li><strong>Kube Proxy:</strong> Manages networking rules for seamless communication between containers and external traffic.</li>
+                    <li><strong>Container Runtime:</strong> Executes containers on host system (e.g., containerd, CRI-O, Docker).</li>
                 </ul>
             </div>
+        </div>
 
-            <!-- KUBE-CONTROLLER-MANAGER DEEP DIVE -->
-            <div id="controller-section" class="bg-purple-50/80 border-2 border-purple-400/80 rounded-xl p-5 shadow-sm space-y-3 transition-all duration-300">
-                <div class="flex items-center gap-2 border-b border-purple-200/80 pb-2">
-                    <span class="text-xl">⚙️</span>
-                    <h3 class="text-lg font-bold text-purple-900">kube-controller-manager Deep Dive</h3>
-                </div>
-                <ul class="space-y-2 text-xs sm:text-sm text-purple-950 leading-relaxed">
-                    <li class="flex items-start gap-2">
-                        <span class="text-purple-600 font-bold">▪</span>
-                        <span><strong>Role in Kubernetes:</strong> Manages various background control loops (controllers) that continuously regulate and drive the actual state of the cluster to match the desired state.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-purple-600 font-bold">▪</span>
-                        <span><strong>Stateless State Management:</strong> Does not hold internal state or metadata; instead, it reads the intended state from <code class="bg-purple-200/70 px-1.5 py-0.5 rounded text-purple-900 font-mono text-xs">etcd</code> via the <code class="bg-purple-200/70 px-1.5 py-0.5 rounded text-purple-900 font-mono text-xs">kube-apiserver</code> and issues modifications to align the system.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-purple-600 font-bold">▪</span>
-                        <div>
-                            <strong>Key Controller Functions:</strong>
-                            <ul class="mt-1 space-y-1 pl-4 border-l-2 border-purple-200">
-                                <li><strong>Node Controller:</strong> Monitors node health via heartbeats, taking corrective action if nodes become unreachable.</li>
-                                <li><strong>Replication Controller:</strong> Maintains the exact requested count of pod replicas across the cluster.</li>
-                                <li><strong>Endpoints Controller:</strong> Populates Endpoints objects to link Kubernetes Services with corresponding target Pods.</li>
-                                <li><strong>Service Account & Token Controllers:</strong> Automates creation of default service accounts and API access tokens for new namespaces.</li>
-                            </ul>
-                        </div>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-purple-600 font-bold">▪</span>
-                        <span><strong>REST API Interaction:</strong> Communicates exclusively with the <code class="bg-purple-200/70 px-1.5 py-0.5 rounded text-purple-900 font-mono text-xs">kube-apiserver</code> using REST endpoints to watch cluster state changes and issue corrective API updates.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="text-purple-600 font-bold">▪</span>
-                        <span><strong>Leader Election:</strong> In multi-master High Availability setups, instances run in active-standby mode utilizing a leader election mechanism to ensure only one active manager drives decisions at a time.</span>
-                    </li>
-                </ul>
-            </div>
+        <!-- DEEP DIVE SECTIONS -->
+        <h3 class="section-title">Component Deep Dives</h3>
 
-        </section>
+        <!-- DEEP DIVE: ETCD -->
+        <div id="etcd-section" class="deep-dive-card card-etcd">
+            <h4 class="card-header-etcd">🔑 etcd Deep Dive</h4>
+            <ul class="card-list">
+                <li><strong>Role & Storage:</strong> Serves as the distributed key-value store for Kubernetes, holding all cluster state data, metadata, and configuration settings.</li>
+                <li><strong>Architecture:</strong> Operates via etcd server and client interactions, ensuring high availability and consistent data replication across the control plane.</li>
+                <li><strong>API Server Integration:</strong> The Kube API Server is the only component that communicates directly with etcd, connecting securely over TLS endpoints.</li>
+                <li><strong>Cluster Deployment:</strong> Can run as a stacked static pod (e.g., <code>kube-system</code>) or as an external, dedicated etcd cluster. Default data directory is typically <code>/var/lib/etcd</code>.</li>
+                <li><strong>Security:</strong> All communication must be encrypted using TLS certificates to guarantee data confidentiality and integrity.</li>
+                <li><strong>Management Tool:</strong> Managed directly via the <code>etcdctl</code> command-line utility for snapshot backups, health checks, and key queries.</li>
+            </ul>
+        </div>
+
+        <!-- DEEP DIVE: KUBE-APISERVER -->
+        <div id="apiserver-section" class="deep-dive-card card-apiserver">
+            <h4 class="card-header-apiserver">🌐 kube-apiserver Deep Dive</h4>
+            <ul class="card-list">
+                <li><strong>Primary Function:</strong> Orchestrates all operations within the Kubernetes cluster, acting as the central communication hub and entry point for all control plane and worker components.</li>
+                <li><strong>API Access & Management:</strong> Serves as the target interface for <code>kubectl</code> CLI commands and automated REST calls, handling CRUD operations on cluster resources.</li>
+                <li><strong>Data Interaction:</strong> Exclusively reads from and writes to <code>etcd</code> to persist cluster state changes, ensuring data consistency across the environment.</li>
+                <li><strong>Architectural Hub:</strong> Coordinates communication across Kubelets, the Scheduler, Controller Manager, and external controllers.</li>
+                <li><strong>Security Pipeline:</strong> Enforces security mechanisms on every request through three sequential gates: <strong>Authentication</strong>, <strong>Authorization</strong> (RBAC), and <strong>Admission Control</strong>.</li>
+                <li><strong>Scaling & Performance:</strong> Designed to scale horizontally. Multiple instances run stateless behind a load balancer to handle high traffic demands and ensure high availability.</li>
+                <li><strong>Versioning & Updates:</strong> Supports concurrent API versioning (e.g., <code>v1</code>, <code>v1beta1</code>) to allow smooth rolling upgrades and backward compatibility without service disruption.</li>
+            </ul>
+        </div>
+
+        <!-- DEEP DIVE: KUBE-CONTROLLER-MANAGER -->
+        <div id="controller-section" class="deep-dive-card card-controller">
+            <h4 class="card-header-controller">⚙️ kube-controller-manager Deep Dive</h4>
+            <ul class="card-list">
+                <li><strong>Role in Kubernetes:</strong> Manages various background control loops (controllers) that continuously regulate and drive the actual state of the cluster to match the desired state.</li>
+                <li><strong>Stateless State Management:</strong> Does not hold internal state or metadata; instead, it reads the intended state from <code>etcd</code> via the <code>kube-apiserver</code> and issues modifications to align the system.</li>
+                <li><strong>Key Controller Functions:</strong>
+                    <ul style="padding-left:18px;margin-top:4px;margin-bottom:4px;">
+                        <li><strong>Node Controller:</strong> Monitors node health via heartbeats, taking corrective action if nodes become unreachable.</li>
+                        <li><strong>Replication Controller:</strong> Maintains the exact requested count of pod replicas across the cluster.</li>
+                        <li><strong>Endpoints Controller:</strong> Populates Endpoints objects to link Kubernetes Services with corresponding target Pods.</li>
+                        <li><strong>Service Account & Token Controllers:</strong> Automates creation of default service accounts and API access tokens for new namespaces.</li>
+                    </ul>
+                </li>
+                <li><strong>REST API Interaction:</strong> Communicates exclusively with the <code>kube-apiserver</code> using REST endpoints to watch cluster state changes and issue corrective API updates.</li>
+                <li><strong>Leader Election:</strong> In multi-master High Availability setups, instances run in active-standby mode utilizing a leader election mechanism to ensure only one active manager drives decisions at a time.</li>
+            </ul>
+        </div>
+
+        <!-- DEEP DIVE: KUBE-SCHEDULER -->
+        <div id="scheduler-section" class="deep-dive-card card-scheduler">
+            <h4 class="card-header-scheduler">⚙️ kube-scheduler Deep Dive</h4>
+            <ul class="card-list">
+                <li><strong>Role & Decision Maker:</strong> Serves as a vital control plane component that assigns unscheduled Pods to optimal Nodes in the cluster. *Note: It only decides placement—it does not physically run or create containers (handled by Kubelet).*</li>
+                <li><strong>Two-Phase Scheduling Process:</strong>
+                    <ul style="padding-left:18px;margin-top:4px;margin-bottom:4px;">
+                        <li><strong>1. Filtering (Predicates):</strong> Eliminates nodes that fail resource capacity requirements (CPU/Memory) or constraint rules (Taints, Node Selectors).</li>
+                        <li><strong>2. Ranking (Priorities):</strong> Scores and ranks remaining candidate nodes using priority functions to select the best target node with maximum available capacity.</li>
+                    </ul>
+                </li>
+                <li><strong>Advanced Scheduling Constraints:</strong> Evaluates complex placement criteria including Resource Requests & Limits, Taints & Tolerations, Node Selectors, and Node/Pod Affinity & Anti-Affinity rules.</li>
+                <li><strong>Customization & Multi-Scheduler:</strong> Supports custom scheduler configurations, custom plugins, or running multiple dedicated schedulers side-by-side in the same cluster.</li>
+            </ul>
+        </div>
+
+        <!-- DEEP DIVE: KUBELET -->
+        <div id="kubelet-section" class="deep-dive-card card-kubelet">
+            <h4 class="card-header-kubelet">🪖 Kubelet Deep Dive</h4>
+            <ul class="card-list">
+                <li><strong>Role & Primary Node Agent:</strong> Runs as an essential agent on every worker node in the cluster, responsible for managing the entire lifecycle of local Pods and containers.</li>
+                <li><strong>Pod Specification (PodSpec) Execution:</strong> Continuously fetches PodSpec definitions from the <code>kube-apiserver</code> and takes corrective actions to ensure running container states strictly match desired specs.</li>
+                <li><strong>Container Runtime Interface (CRI):</strong> Interacts directly with the underlying Container Runtime (e.g., <code>containerd</code>, <code>CRI-O</code>, <code>Docker</code>) to issue create, start, stop, and destroy commands.</li>
+                <li><strong>Node Registration & Capacity Reporting:</strong> Registers host node details (CPU/Memory capacity, availability, labels) with the API server so the Scheduler can make informed placement decisions.</li>
+                <li><strong>Health Monitoring & Probes:</strong> Executes periodic liveness, readiness, and startup health checks, reporting node and pod status metrics continuously back to the Master node.</li>
+            </ul>
+        </div>
+
+        <!-- DEEP DIVE: KUBE-PROXY -->
+        <div id="kubeproxy-section" class="deep-dive-card card-kubeproxy">
+            <h4 class="card-header-kubeproxy">🔀 Kube-Proxy Deep Dive</h4>
+            <ul class="card-list">
+                <li><strong>Role & Traffic Management:</strong> Runs as a network daemon on every worker node, maintaining packet routing and filtering rules to handle network traffic directed toward Kubernetes Services.</li>
+                <li><strong>Service Abstraction & IP Stability:</strong> Solves ephemeral Pod IP changes by providing stable virtual IPs (ClusterIPs/NodePorts), dynamically mapping Service IPs to active backend Pod endpoints.</li>
+                <li><strong>Traffic Forwarding Engines:</strong> Leverages host network packet filtering mechanisms—primarily <code>iptables</code> or high-performance <code>IPVS</code>—to load balance and route incoming requests automatically.</li>
+                <li><strong>Continuous State Watching:</strong> Watches the <code>kube-apiserver</code> for Service and Endpoint/EndpointSlice creations or updates, keeping node networking rules synchronized in real time.</li>
+                <li><strong>Scope Clarification:</strong> Manages routing to <strong>Services</strong>; it does not handle direct Pod-to-Pod overlay container networking (which is handled by the CNI plugin like Calico or Flannel).</li>
+            </ul>
+        </div>
+
+        <!-- DEEP DIVE: PODS -->
+        <div id="pod-section" class="deep-dive-card card-pod">
+            <h4 class="card-header-pod">📦 Pods Deep Dive</h4>
+            <ul class="card-list">
+                <li><strong>Smallest Deployable Unit:</strong> The foundational execution block in Kubernetes, encapsulating one or more tightly-coupled application containers.</li>
+                <li><strong>Shared Network & Storage Namespace:</strong> Containers within the same Pod share a single network IP address and network stack, allowing them to communicate via <code>localhost</code> and share attached storage volumes.</li>
+                <li><strong>Multi-Container Patterns:</strong> Supports running secondary sidecar/helper processes (e.g., log shippers, proxies) alongside primary application containers within a single Pod boundaries.</li>
+                <li><strong>Ephemeral Lifecycle:</strong> Pods are non-permanent; Kubernetes continuously orchestrates their creation, destruction, scaling, and rescheduling based on target controller replicas.</li>
+                <li><strong>Resource Limits & Scheduling:</strong> Defines precise CPU and Memory Requests (minimum guaranteed) and Limits (maximum allowed), driving informed scheduling choices by the <code>kube-scheduler</code>.</li>
+                <li><strong>Health Monitoring:</strong> Monitored continuously by Kubelet through Liveness and Readiness probes to automatically restart failed containers or remove unready pods from Service routing.</li>
+            </ul>
+        </div>
 
         <!-- HOW COMPONENTS WORK TOGETHER -->
-        <section class="bg-slate-100/80 border-l-4 border-k8s-blue rounded-r-xl p-5 shadow-sm space-y-2">
-            <h3 class="text-base font-bold text-k8s-blue flex items-center gap-2">
-                <span>🔄</span> How Components Work Together
-            </h3>
-            <ul class="space-y-1.5 text-xs sm:text-sm text-slate-700">
-                <li class="flex items-start gap-2">
-                    <span class="font-bold text-k8s-blue">1.</span>
-                    <span><strong>Master oversees Worker:</strong> Master coordinates high-level scheduling and resource allocation across workers.</span>
-                </li>
-                <li class="flex items-start gap-2">
-                    <span class="font-bold text-k8s-blue">2.</span>
-                    <span><strong>etcd informs decisions:</strong> State data in <code class="bg-slate-200 px-1 rounded text-slate-800 font-mono text-xs">etcd</code> allows the Scheduler and Controllers to make runtime decisions.</span>
-                </li>
-                <li class="flex items-start gap-2">
-                    <span class="font-bold text-k8s-blue">3.</span>
-                    <span><strong>API Server is the hub:</strong> All Master-to-Worker communication routes strictly through the Kube API Server.</span>
-                </li>
-                <li class="flex items-start gap-2">
-                    <span class="font-bold text-k8s-blue">4.</span>
-                    <span><strong>Kubelet dialogue:</strong> Kubelet maintains active streaming connections with the Kube API Server for instructions and reports node/pod health back.</span>
-                </li>
+        <div style="background-color:#f4f6f6;border-left:4px solid var(--primary);padding:12px 15px;border-radius:0 6px 6px 0;margin-bottom:30px;margin-top:25px;">
+            <strong style="color:var(--primary);font-size:15px;">How Components Work Together:</strong>
+            <ul style="padding-left:18px;font-size:14px;margin-top:8px;margin-bottom:0;">
+                <li><strong>Master oversees Worker:</strong> Master coordinates high-level scheduling and resource allocation across workers.</li>
+                <li><strong>etcd informs decisions:</strong> State data in <code>etcd</code> allows the Scheduler and Controllers to make runtime decisions.</li>
+                <li><strong>API Server is the hub:</strong> All Master-to-Worker communication routes through the Kube API Server.</li>
+                <li><strong>Kubelet dialogue:</strong> Kubelet maintains active streaming connections with the Kube API Server for instructions and status updates.</li>
             </ul>
-        </section>
+        </div>
 
         <!-- TRAINING NOTES SECTION -->
-        <section class="space-y-3">
-            <h3 class="text-lg font-bold text-slate-900 border-b border-slate-200 pb-2">
-                Training Notes
-            </h3>
-            <div class="bg-white border border-dashed border-slate-300 rounded-xl p-5 text-sm text-slate-500 min-h-[100px] flex items-center justify-center italic">
-                Ready for new notes. Add your training sections, commands, or key takeaways here.
-            </div>
-        </section>
+        <h3 class="section-title">Training Notes</h3>
+        <div style="background-color:#fcfcfc;border:1px dashed #c8c8c8;border-radius:8px;padding:20px;margin-bottom:30px;color:#787878;">
+            <em>Ready for new notes. Add your training sections, commands, or key takeaways here.</em>
+        </div>
 
         <!-- COLLAPSIBLE REFERENCE ARCHIVE -->
-        <section class="pt-4">
-            <details class="group bg-white border border-slate-200 rounded-xl shadow-sm transition-all">
-                <summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-slate-700 hover:text-k8s-blue">
-                    <span class="flex items-center gap-2">
-                        <span>📂</span> Reference Archive: Analogies & Basics
-                    </span>
-                    <span class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded group-open:rotate-180 transition-transform duration-200">
-                        ▼
-                    </span>
-                </summary>
-                
-                <div class="p-5 border-t border-slate-100 space-y-6 text-sm text-slate-600">
-                    
-                    <!-- Analogies -->
-                    <div>
-                        <h4 class="font-bold text-slate-800 text-base mb-2">The Steam Analogy:</h4>
-                        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
-                            <li class="bg-slate-50 p-2.5 rounded border border-slate-200">
-                                <strong class="text-slate-800">Docker (registry/library):</strong> Steam library holding game titles (images)
-                            </li>
-                            <li class="bg-slate-50 p-2.5 rounded border border-slate-200">
-                                <strong class="text-slate-800">1 game = 1 Docker image:</strong> Single application recipe
-                            </li>
-                            <li class="bg-slate-50 p-2.5 rounded border border-slate-200">
-                                <strong class="text-slate-800">Deployment:</strong> Rule maintaining target replica count
-                            </li>
-                            <li class="bg-slate-50 p-2.5 rounded border border-slate-200">
-                                <strong class="text-slate-800">Pods:</strong> Active running copies of a game
-                            </li>
-                            <li class="bg-slate-50 p-2.5 rounded border border-slate-200">
-                                <strong class="text-slate-800">Nodes:</strong> Compute resources (VMs) hosting pods
-                            </li>
-                            <li class="bg-slate-50 p-2.5 rounded border border-slate-200">
-                                <strong class="text-slate-800">Kubernetes:</strong> Conductor orchestrating workloads across nodes
-                            </li>
-                        </ul>
-                    </div>
+        <details style="border:1px solid #e0e0e0;border-radius:6px;padding:10px 15px;background-color:#fdfdfd;">
+            <summary>📂 Reference Archive: Analogies & Basics (Click to expand)</summary>
+            
+            <div style="margin-top:15px;">
+                <p style="font-size:15px;font-weight:600;margin-bottom:5px;">The Steam Analogy:</p>
+                <ul style="padding-left:20px;margin-top:5px;font-size:14px;">
+                    <li><strong>Docker (registry/library)</strong> — Steam library holding game titles (images)</li>
+                    <li><strong>1 game = 1 Docker image</strong> — single application recipe</li>
+                    <li><strong>Deployment</strong> — rule maintaining target replica count</li>
+                    <li><strong>Pods</strong> — active running copies of a game</li>
+                    <li><strong>Nodes</strong> — compute resources (VMs) hosting pods</li>
+                    <li><strong>Kubernetes</strong> — conductor orchestrating workloads across nodes</li>
+                </ul>
 
-                    <!-- Namespaces Layout -->
-                    <div>
-                        <h4 class="font-bold text-slate-800 text-base mb-2">Namespaces Layout</h4>
-                        <pre class="bg-slate-900 text-slate-200 p-4 rounded-lg font-mono text-xs overflow-x-auto leading-relaxed">NameSpaces-Cluster
+                <h4 style="color:var(--primary);margin-top:20px;margin-bottom:5px;">Namespaces Layout</h4>
+                <pre>NameSpaces-Cluster
 ├── dev
 │   ├── pod frontend
 │   └── pod backend
@@ -539,38 +487,27 @@
 └── prod
     ├── pod frontend
     └── pod backend</pre>
-                    </div>
-
-                </div>
-            </details>
-        </section>
+            </div>
+        </details>
 
     </div>
 
-    <!-- JAVASCRIPT INTERACTION LOGIC -->
+    <!-- JAVASCRIPT FOR INTERACTIVE SCROLLING -->
     <script>
         function scrollToSection(sectionId) {
-            const target = document.getElementById(sectionId);
-            if (!target) return;
-
-            // Remove existing highlight effects from all cards
-            document.querySelectorAll('.highlight-card').forEach(el => {
-                el.classList.remove('highlight-card');
-            });
-
-            // Smooth scroll into view
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-            });
-
-            // Add glow focus animation
-            target.classList.add('highlight-card');
-
-            // Remove highlight glow after 4 seconds
-            setTimeout(() => {
-                target.classList.remove('highlight-card');
-            }, 4000);
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Remove previous highlight class if active
+                element.classList.remove('card-highlight');
+                
+                // Trigger reflow to restart animation
+                void element.offsetWidth;
+                
+                // Add highlight class
+                element.classList.add('card-highlight');
+            }
         }
     </script>
 </body>
