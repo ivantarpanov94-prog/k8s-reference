@@ -188,7 +188,8 @@
         details summary {
             cursor: pointer;
             font-weight: 600;
-            color: #666;
+            color: #1a73e8;
+            outline: none;
         }
 
         pre {
@@ -199,6 +200,15 @@
             font-family: 'Courier New', Courier, monospace;
             font-size: 13px;
             overflow-x: auto;
+        }
+
+        .cmd-comment {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        .cmd-text {
+            color: #61afef;
         }
     </style>
 </head>
@@ -447,6 +457,38 @@
             </ul>
         </div>
 
+        <!-- DEEP DIVE: POD YAML DEFINITION -->
+        <div id="pod-yaml-section" class="deep-dive-card card-pod" style="background-color: #f4fbf7; border: 1.5px solid #27ae60;">
+            <h4 class="card-header-pod" style="color: #1e8449; border-bottom: 1px solid #a9dfbf;">📄 Pod Definition File (`pod-definition.yaml`) Deep Dive</h4>
+            <ul class="card-list">
+                <li><strong>Core Root Fields:</strong> Every Kubernetes object manifest relies on four fundamental top-level parameters:
+                    <ul style="padding-left:18px;margin-top:4px;margin-bottom:4px;">
+                        <li><code>apiVersion</code>: Specifies the Kubernetes API version used for object creation (Standard Pods use <code>v1</code>).</li>
+                        <li><code>kind</code>: Specifies the object resource type being declared (e.g., <code>Pod</code>, <code>Service</code>, <code>Deployment</code>). *Case-sensitive.*</li>
+                        <li><code>metadata</code>: Holds non-functional identifying details, including resource <code>name</code> and key-value <code>labels</code> for filtering.</li>
+                        <li><code>spec</code>: Contains technical configurations and desired state specifications (e.g., container definitions, image names, ports).</li>
+                    </ul>
+                </li>
+                <li><strong>Indentation & Structure:</strong> YAML relies strictly on precise space indentation to denote object hierarchies and child properties.</li>
+            </ul>
+
+            <!-- Manifest Example Block -->
+            <div style="margin-top: 12px; margin-bottom: 8px;">
+                <strong style="font-size: 13.5px; color: #1e8449;">Example Pod Manifest (`pod-definition.yaml`):</strong>
+                <pre style="margin-top: 6px; margin-bottom: 6px;"><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: my-app-pod
+  labels:
+    app: my-app
+    tier: frontend
+spec:
+  containers:
+    - name: nginx-container
+      image: nginx</code></pre>
+            </div>
+        </div>
+
         <!-- HOW COMPONENTS WORK TOGETHER -->
         <div style="background-color:#f4f6f6;border-left:4px solid var(--primary);padding:12px 15px;border-radius:0 6px 6px 0;margin-bottom:30px;margin-top:25px;">
             <strong style="color:var(--primary);font-size:15px;">How Components Work Together:</strong>
@@ -458,15 +500,64 @@
             </ul>
         </div>
 
-        <!-- TRAINING NOTES SECTION -->
-        <h3 class="section-title">Training Notes</h3>
-        <div style="background-color:#fcfcfc;border:1px dashed #c8c8c8;border-radius:8px;padding:20px;margin-bottom:30px;color:#787878;">
-            <em>Ready for new notes. Add your training sections, commands, or key takeaways here.</em>
+        <!-- INTERACTIVE KUBECTL COMMAND CHEATSHEET -->
+        <h3 class="section-title">🛠️ Interactive `kubectl` Command Cheatsheet</h3>
+        
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px;">
+
+            <!-- CATEGORY 1: Viewing & Inspecting -->
+            <details style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 14px;">
+                <summary>🔍 Viewing & Inspecting Resources</summary>
+                <div style="margin-top: 10px;">
+                    <pre style="margin: 0;"><code><span class="cmd-comment"># List all pods in the active namespace</span>
+<span class="cmd-text">kubectl get pods</span>
+
+<span class="cmd-comment"># List all services in the active namespace</span>
+<span class="cmd-text">kubectl get svc</span>
+
+<span class="cmd-comment"># List all nodes across the cluster</span>
+<span class="cmd-text">kubectl get nodes</span>
+
+<span class="cmd-comment"># Inspect deep details & event history for a specific pod</span>
+<span class="cmd-text">kubectl describe pod &lt;pod-name&gt;</span>
+
+<span class="cmd-comment"># View merged kubeconfig settings & active context</span>
+<span class="cmd-text">kubectl config view</span></code></pre>
+                </div>
+            </details>
+
+            <!-- CATEGORY 2: Managing Resources via YAML -->
+            <details style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 14px;">
+                <summary>📄 Managing Resources via YAML</summary>
+                <div style="margin-top: 10px;">
+                    <pre style="margin: 0;"><code><span class="cmd-comment"># Imperative creation of resources defined in a YAML file</span>
+<span class="cmd-text">kubectl create -f &lt;file.yaml&gt;</span>
+
+<span class="cmd-comment"># Declarative update/creation (recommended for production setups)</span>
+<span class="cmd-text">kubectl apply -f &lt;file.yaml&gt;</span>
+
+<span class="cmd-comment"># Delete resources defined inside the specified YAML file</span>
+<span class="cmd-text">kubectl delete -f &lt;file.yaml&gt;</span></code></pre>
+                </div>
+            </details>
+
+            <!-- CATEGORY 3: Debugging & Interacting -->
+            <details style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 14px;">
+                <summary>🐛 Debugging & Interacting</summary>
+                <div style="margin-top: 10px;">
+                    <pre style="margin: 0;"><code><span class="cmd-comment"># Stream or fetch stdout logs from a container inside a pod</span>
+<span class="cmd-text">kubectl logs &lt;pod-name&gt;</span>
+
+<span class="cmd-comment"># Open an interactive terminal session inside a running pod container</span>
+<span class="cmd-text">kubectl exec -it &lt;pod-name&gt; -- /bin/bash</span></code></pre>
+                </div>
+            </details>
+
         </div>
 
         <!-- COLLAPSIBLE REFERENCE ARCHIVE -->
         <details style="border:1px solid #e0e0e0;border-radius:6px;padding:10px 15px;background-color:#fdfdfd;">
-            <summary>📂 Reference Archive: Analogies & Basics (Click to expand)</summary>
+            <summary style="color:#666;">📂 Reference Archive: Analogies & Basics (Click to expand)</summary>
             
             <div style="margin-top:15px;">
                 <p style="font-size:15px;font-weight:600;margin-bottom:5px;">The Steam Analogy:</p>
