@@ -489,6 +489,45 @@ spec:
             </div>
         </div>
 
+        <!-- DEEP DIVE: REPLICASETS -->
+        <div id="replicaset-section" class="deep-dive-card card-controller" style="background-color: #fcf3cf; border: 1.5px solid #f39c12;">
+            <h4 class="card-header-controller" style="color: #b7950b; border-bottom: 1px solid #f7dc6f;">🔄 ReplicaSets Deep Dive</h4>
+            <ul class="card-list">
+                <li><strong>Role & High Availability:</strong> Ensures fault tolerance and reliability by continuously maintaining a specified count of running Pod replicas across the cluster.</li>
+                <li><strong>Label Selector & Pod Matching:</strong> Uses <code>matchLabels</code> under the `selector` field to identify and track which Pods belong to its management scope.
+                    <ul style="padding-left:18px;margin-top:4px;margin-bottom:4px;">
+                        <li><strong>Critical Requirement:</strong> The labels defined in <code>.spec.selector.matchLabels</code> <strong>must strictly match</strong> the labels defined inside the Pod template (`.spec.template.metadata.labels`). A mismatch results in configuration validation errors.</li>
+                    </ul>
+                </li>
+                <li><strong>Self-Healing:</strong> Continuously monitors cluster state via control loops. If a Pod crashes or is deleted, the ReplicaSet controller automatically provisions a new replacement instance.</li>
+            </ul>
+
+            <!-- ReplicaSet Manifest Example Block -->
+            <div style="margin-top: 12px; margin-bottom: 8px;">
+                <strong style="font-size: 13.5px; color: #b7950b;">Example ReplicaSet Manifest (`replicaset-definition.yaml`):</strong>
+                <pre style="margin-top: 6px; margin-bottom: 6px;"><code>apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: myapp-replicaset
+  labels:
+    app: myapp
+    tier: frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      tier: frontend  # Must match template labels below!
+  template:
+    metadata:
+      labels:
+        tier: frontend  # Matched by selector above
+    spec:
+      containers:
+        - name: php-redis
+          image: gcr.io/google_samples/gb-frontend:v3</code></pre>
+            </div>
+        </div>
+
         <!-- HOW COMPONENTS WORK TOGETHER -->
         <div style="background-color:#f4f6f6;border-left:4px solid var(--primary);padding:12px 15px;border-radius:0 6px 6px 0;margin-bottom:30px;margin-top:25px;">
             <strong style="color:var(--primary);font-size:15px;">How Components Work Together:</strong>
@@ -522,7 +561,13 @@ spec:
 <span class="cmd-text">kubectl describe pod &lt;pod-name&gt;</span>
 
 <span class="cmd-comment"># View merged kubeconfig settings & active context</span>
-<span class="cmd-text">kubectl config view</span></code></pre>
+<span class="cmd-text">kubectl config view</span>
+
+<span class="cmd-comment"># List all ReplicaSets in the current namespace</span>
+<span class="cmd-text">kubectl get replicaset</span>  <span class="cmd-comment"># (or kubectl get rs)</span>
+
+<span class="cmd-comment"># Inspect detailed status and troubleshooting events for a ReplicaSet</span>
+<span class="cmd-text">kubectl describe rs/&lt;replicaset-name&gt;</span></code></pre>
                 </div>
             </details>
 
@@ -537,7 +582,10 @@ spec:
 <span class="cmd-text">kubectl apply -f &lt;file.yaml&gt;</span>
 
 <span class="cmd-comment"># Delete resources defined inside the specified YAML file</span>
-<span class="cmd-text">kubectl delete -f &lt;file.yaml&gt;</span></code></pre>
+<span class="cmd-text">kubectl delete -f &lt;file.yaml&gt;</span>
+
+<span class="cmd-comment"># Dynamically scale a ReplicaSet to a new desired replica count</span>
+<span class="cmd-text">kubectl scale --replicas=5 rs/&lt;replicaset-name&gt;</span></code></pre>
                 </div>
             </details>
 
