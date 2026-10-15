@@ -528,6 +528,54 @@ spec:
             </div>
         </div>
 
+        <!-- DEEP DIVE: SERVICES (NODEPORT & CLUSTERIP) -->
+        <div id="service-section" class="deep-dive-card" style="background-color: #eafaf1; border: 1.5px solid #27ae60;">
+            <h4 style="color: #1e8449; border-bottom: 1px solid #a9dfbf; padding-bottom: 6px;">🌐 Kubernetes Services Deep Dive (`NodePort` & `ClusterIP`)</h4>
+            <ul class="card-list">
+                <li><strong>Role & Need for Services:</strong> Pods are ephemeral with frequently changing IPs. Services provide a stable, consistent abstraction layer and virtual IP to ensure reliable communication.</li>
+                <li><strong>Core Service Types:</strong>
+                    <ul style="padding-left:18px;margin-top:4px;margin-bottom:4px;">
+                        <li><code>ClusterIP</code> (Default): Exposes the service on an internal virtual IP accessible only within the cluster. Ideal for internal microservice communication (e.g., Frontend to Backend/Database).</li>
+                        <li><code>NodePort</code>: Exposes a static port (30000–32767) on every node IP, enabling external traffic to reach pods via <code>&lt;NodeIP&gt;:&lt;NodePort&gt;</code>.</li>
+                        <li><code>LoadBalancer</code>: Provisions an external cloud load balancer to distribute external traffic across cluster nodes.</li>
+                    </ul>
+                </li>
+                <li><strong>Label Selectors & Load Balancing:</strong> Uses <code>.spec.selector</code> to automatically target backend pods sharing matching labels, distributing incoming requests across them.</li>
+            </ul>
+
+            <!-- Service Manifest Example Block -->
+            <div style="margin-top: 12px; margin-bottom: 8px;">
+                <strong style="font-size: 13.5px; color: #1e8449;">Example Service Manifests (`service-definition.yaml`):</strong>
+                <pre style="margin-top: 6px; margin-bottom: 6px;"><code># NodePort Service (External Access)
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-nodeport-service
+spec:
+  type: NodePort
+  selector:
+    tier: frontend
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30080
+
+---
+# ClusterIP Service (Internal Microservice Communication)
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-clusterip-service
+spec:
+  # type: ClusterIP  (Default, optional)
+  selector:
+    tier: backend
+  ports:
+    - port: 80
+      targetPort: 8080</code></pre>
+            </div>
+        </div>
+
         <!-- HOW COMPONENTS WORK TOGETHER -->
         <div style="background-color:#f4f6f6;border-left:4px solid var(--primary);padding:12px 15px;border-radius:0 6px 6px 0;margin-bottom:30px;margin-top:25px;">
             <strong style="color:var(--primary);font-size:15px;">How Components Work Together:</strong>
@@ -552,7 +600,7 @@ spec:
 <span class="cmd-text">kubectl get pods</span>
 
 <span class="cmd-comment"># List all services in the active namespace</span>
-<span class="cmd-text">kubectl get svc</span>
+<span class="cmd-text">kubectl get svc</span>  <span class="cmd-comment"># (or kubectl get services)</span>
 
 <span class="cmd-comment"># List all nodes across the cluster</span>
 <span class="cmd-text">kubectl get nodes</span>
@@ -567,7 +615,10 @@ spec:
 <span class="cmd-text">kubectl get replicaset</span>  <span class="cmd-comment"># (or kubectl get rs)</span>
 
 <span class="cmd-comment"># Inspect detailed status and troubleshooting events for a ReplicaSet</span>
-<span class="cmd-text">kubectl describe rs/&lt;replicaset-name&gt;</span></code></pre>
+<span class="cmd-text">kubectl describe rs/&lt;replicaset-name&gt;</span>
+
+<span class="cmd-comment"># Inspect service details (endpoints, cluster IP, NodePort mappings)</span>
+<span class="cmd-text">kubectl describe service &lt;service-name&gt;</span></code></pre>
                 </div>
             </details>
 
