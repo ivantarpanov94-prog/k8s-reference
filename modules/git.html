@@ -1,0 +1,60 @@
+<div>
+    <h3 class="section-title">🌿 Version Control & Collaboration Guide (Git)</h3>
+    <p style="font-size: 14.5px; color: #475569; margin-bottom: 20px;">
+        Summary of core concepts, workflows, and essential command references for Git version control (Lectures 1–19).
+    </p>
+
+    <h4 style="color: var(--primary); margin-top: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">Core Concepts & Lectures Summary</h4>
+    <ul style="font-size: 14.5px; line-height: 1.7; padding-left: 20px;">
+        <li><strong>Fundamentals & Setup:</strong> Overview of Git, installation, configuration, initializing repositories (<code>git init</code>), staging (<code>git add</code>), and committing (<code>git commit</code>).</li>
+        <li><strong>Branching & Merging:</strong> Managing branches (<code>git branch</code>, <code>git checkout</code> / <code>git switch</code>), merging code safely, and handling merge conflicts (<code>git merge --abort</code>).</li>
+        <li><strong>Collaboration & Remotes:</strong> Remote repositories, cloning (<code>git clone</code>), fetching (<code>git fetch</code>), pushing (<code>git push</code>), and utilizing pull requests.</li>
+        <li><strong>Advanced Utilities:</strong> Temporary work stashing (<code>git stash</code>), release tagging (<code>git tag</code>), and pattern exclusion via <code>.gitignore</code>.</li>
+    </ul>
+
+    <h3 class="section-title">🛠️ Essential Git Command Cheatsheet</h3>
+    <pre><code><span class="cmd-comment"># Initialize a new local Git repository</span>
+<span class="cmd-text">git init</span>
+
+<span class="cmd-comment"># Stage changes for the next commit</span>
+<span class="cmd-text">git add [file-name]</span>  <span class="cmd-comment"># (or use 'git add .' to stage all changes)</span>
+
+<span class="cmd-comment"># Commit staged changes with a descriptive log message</span>
+<span class="cmd-text">git commit -m "feat: descriptive commit message"</span>
+
+<span class="cmd-comment"># Check the current state of working directory and staged files</span>
+<span class="cmd-text">git status</span>
+
+<span class="cmd-comment"># List, create, or delete branches</span>
+<span class="cmd-text">git branch</span>  <span class="cmd-comment"># (list) / git branch [branch-name] (create)</span>
+
+<span class="cmd-comment"># Switch to an existing branch</span>
+<span class="cmd-text">git checkout [branch-name]</span>  <span class="cmd-comment"># (or git switch [branch-name])</span>
+
+<span class="cmd-comment"># Merge changes from a target branch into your active branch</span>
+<span class="cmd-text">git merge [branch-name]</span>
+
+<span class="cmd-comment"># Abort an active merge process if unresolved conflicts occur</span>
+<span class="cmd-text">git merge --abort</span>
+
+<span class="cmd-comment"># View line-by-line diffs of unstaged or uncommitted changes</span>
+<span class="cmd-text">git diff</span>
+
+<span class="cmd-comment"># View the repository commit history log</span>
+<span class="cmd-text">git log --oneline --graph</span>
+
+<span class="cmd-comment"># Clone a remote repository down to your local machine</span>
+<span class="cmd-text">git clone [repository-url]</span>
+
+<span class="cmd-comment"># Download objects and refs from a remote repository</span>
+<span class="cmd-text">git fetch</span>
+
+<span class="cmd-comment"># Upload local branch commits to a remote repository</span>
+<span class="cmd-text">git push origin [branch-name]</span>
+
+<span class="cmd-comment"># Temporarily stash uncommitted changes to work on something else</span>
+<span class="cmd-text">git stash</span>  <span class="cmd-comment"># (restore later with 'git stash pop')</span>
+
+<span class="cmd-comment"># Create a lightweight or annotated tag for a specific release commit</span>
+<span class="cmd-text">git tag v1.0.0</span></code></pre>
+</div>
