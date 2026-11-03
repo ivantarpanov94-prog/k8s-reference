@@ -67,10 +67,51 @@
             background: var(--primary);
             color: white;
         }
-        /* Shared Styles for Modules */
+        /* Shared Styles for Modules & Diagram */
         h2, h3, h4 { margin-top: 0; }
         .section-title { color: var(--primary); border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; margin-top: 30px; }
+        
+        .diagram-container {
+            width: 100%;
+            background: #f8fafc;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 15px;
+            box-sizing: border-box;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .diagram-svg { width: 100%; height: auto; max-width: 780px; }
+        .interactive-node { cursor: pointer; transition: all 0.25s ease; }
+        .interactive-node:hover rect { filter: drop-shadow(0px 0px 6px rgba(26, 115, 232, 0.6)); stroke-width: 2.5px; }
+        .interactive-node:hover text { font-weight: bold; }
+
+        .card-highlight { animation: highlightGlow 2s ease-out; }
+        @keyframes highlightGlow {
+            0% { box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.6); transform: scale(1.01); }
+            100% { box-shadow: 0 0 0 0px rgba(26, 115, 232, 0); transform: scale(1); }
+        }
+
         .deep-dive-card { border-radius: 8px; padding: 18px; margin-bottom: 18px; }
+        .card-etcd { background-color: var(--etcd-bg); border: 1.5px solid var(--etcd-border); }
+        .card-apiserver { background-color: var(--apiserver-bg); border: 1.5px solid var(--apiserver-border); }
+        .card-controller { background-color: var(--controller-bg); border: 1.5px solid var(--controller-border); }
+        .card-scheduler { background-color: var(--scheduler-bg); border: 1.5px solid var(--scheduler-border); }
+        .card-kubelet { background-color: var(--kubelet-bg); border: 1.5px solid var(--kubelet-border); }
+        .card-kubeproxy { background-color: var(--kubeproxy-bg); border: 1.5px solid var(--kubeproxy-border); }
+        .card-pod { background-color: var(--pod-bg); border: 1.5px solid var(--pod-border); }
+
+        .card-header-etcd { color: #b7950b; border-bottom: 1px solid #f7dc6f; }
+        .card-header-apiserver { color: #1f618d; border-bottom: 1px solid #aed6f1; }
+        .card-header-controller { color: #723280; border-bottom: 1px solid #d7bde2; }
+        .card-header-scheduler { color: #a04000; border-bottom: 1px solid #f5cba7; }
+        .card-header-kubelet { color: #1e8449; border-bottom: 1px solid #a9dfbf; }
+        .card-header-kubeproxy { color: #6c3483; border-bottom: 1px solid #d2b4de; }
+        .card-header-pod { color: #117864; border-bottom: 1px solid #a3e4d7; }
+
+        ul.card-list { padding-left: 18px; font-size: 14px; margin-top: 8px; margin-bottom: 0; line-height: 1.7; }
+        .hint-banner { background-color: #e8f4f8; border-left: 4px solid var(--primary); padding: 10px 14px; border-radius: 4px; font-size: 13.5px; margin-bottom: 20px; color: #1a5276; }
+
         pre { background: #282c34; color: #abb2bf; padding: 12px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 13px; overflow-x: auto; }
         .cmd-comment { color: #7f8c8d; font-style: italic; }
         .cmd-text { color: #61afef; }
@@ -85,21 +126,24 @@
         
         <!-- Navigation Tabs -->
         <div class="nav-bar">
-            <button class="nav-btn active" onclick="loadModule('kubernetes')">☸️ Kubernetes</button>
-            <button class="nav-btn" onclick="loadModule('git')">🌿 Git Version Control</button>
-            <!-- Future modules (e.g., Docker, Terraform) can be added here easily -->
+            <button class="nav-btn active" id="btn-kubernetes" onclick="loadModule('kubernetes', this)">☸️ Kubernetes</button>
+            <button class="nav-btn" id="btn-git" onclick="loadModule('git', this)">🌿 Git Version Control</button>
         </div>
 
         <!-- Dynamic Content Injection Zone -->
-        <div id="content-viewport">
-            <!-- Module content loads here automatically -->
-        </div>
+        <div id="content-viewport"></div>
     </div>
 
     <script>
-        async function loadModule(moduleName) {
+        async function loadModule(moduleName, clickedBtn) {
+            // Update active states safely (handles both click and window.onload)
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            if (clickedBtn) {
+                clickedBtn.classList.add('active');
+            } else {
+                const defaultBtn = document.getElementById(`btn-${moduleName}`);
+                if (defaultBtn) defaultBtn.classList.add('active');
+            }
 
             try {
                 let response = await fetch(`modules/${moduleName}.html`);
@@ -111,7 +155,19 @@
             }
         }
 
-        // Load Kubernetes by default on startup
+        // Global scroll function for interactive SVG diagram jumps
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                element.classList.remove('card-highlight');
+                void element.offsetWidth; // Trigger reflow to restart animation
+                element.classList.add('card-highlight');
+            } else {
+                console.warn(`Target section with ID "${sectionId}" was not found on the page.`);
+            }
+        }
+
         window.onload = () => {
             loadModule('kubernetes');
         };

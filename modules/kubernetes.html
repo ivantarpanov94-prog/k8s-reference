@@ -23,7 +23,7 @@
             <rect x="390" y="10" width="360" height="385" rx="10" fill="#ebf5fb" stroke="#2980b9" stroke-width="2" stroke-dasharray="6,4"/>
             <text x="405" y="32" fill="#1f618d" font-weight="bold" font-size="14">Worker Node</text>
 
-            <!-- CONNECTING LINES (CONTROL PLANE) -->
+            <!-- CONNECTING LINES -->
             <path d="M 205 160 L 205 95 L 125 95" stroke="#34495e" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
             <path d="M 140 205 L 125 205" stroke="#34495e" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
             <path d="M 205 250 L 205 320 L 125 320" stroke="#34495e" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
@@ -208,79 +208,4 @@
             <li><strong>Health Monitoring:</strong> Monitored continuously by Kubelet through Liveness and Readiness probes to automatically restart failed containers or remove unready pods from Service routing.</li>
         </ul>
     </div>
-
-    <div id="pod-yaml-section" class="deep-dive-card card-pod" style="background-color: #f4fbf7; border: 1.5px solid #27ae60;">
-        <h4 class="card-header-pod" style="color: #1e8449; border-bottom: 1px solid #a9dfbf;">📄 Pod Definition File (<code>pod-definition.yaml</code>) Deep Dive</h4>
-        <ul class="card-list">
-            <li><strong>Core Root Fields:</strong> Every Kubernetes object manifest relies on four fundamental top-level parameters:
-                <ul style="padding-left:18px;margin-top:4px;margin-bottom:4px;">
-                    <li><code>apiVersion</code>: Specifies the Kubernetes API version used for object creation (Standard Pods use <code>v1</code>).</li>
-                    <li><code>kind</code>: Specifies the object resource type being declared (e.g., <code>Pod</code>, <code>Service</code>, <code>Deployment</code>). *Case-sensitive.*</li>
-                    <li><code>metadata</code>: Holds non-functional identifying details, including resource <code>name</code> and key-value <code>labels</code> for filtering.</li>
-                    <li><code>spec</code>: Contains technical configurations and desired state specifications (e.g., container definitions, image names, ports).</li>
-                </ul>
-            </li>
-            <li><strong>Indentation & Structure:</strong> YAML relies strictly on precise space indentation to denote object hierarchies and child properties.</li>
-        </ul>
-
-        <div style="margin-top: 12px; margin-bottom: 8px;">
-            <strong style="font-size: 13.5px; color: #1e8449;">Example Pod Manifest (<code>pod-definition.yaml</code>):</strong>
-            <pre style="margin-top: 6px; margin-bottom: 6px;"><code>apiVersion: v1
-kind: Pod
-metadata:
-  name: my-app-pod
-  labels:
-    app: my-app
-    tier: frontend
-spec:
-  containers:
-    - name: nginx-container
-      image: nginx</code></pre>
-        </div>
-    </div>
-
-    <div id="replicaset-section" class="deep-dive-card card-controller" style="background-color: #fcf3cf; border: 1.5px solid #f39c12;">
-        <h4 class="card-header-controller" style="color: #b7950b; border-bottom: 1px solid #f7dc6f;">🔄 ReplicaSets Deep Dive</h4>
-        <ul class="card-list">
-            <li><strong>Role & High Availability:</strong> Ensures fault tolerance and reliability by continuously maintaining a specified count of running Pod replicas across the cluster.</li>
-            <li><strong>Label Selector & Pod Matching:</strong> Uses <code>matchLabels</code> under the <code>selector</code> field to identify and track which Pods belong to its management scope.
-                <ul style="padding-left:18px;margin-top:4px;margin-bottom:4px;">
-                    <li><strong>Critical Requirement:</strong> The labels defined in <code>.spec.selector.matchLabels</code> <strong>must strictly match</strong> the labels defined inside the Pod template (<code>.spec.template.metadata.labels</code>). A mismatch results in configuration validation errors.</li>
-                </ul>
-            </li>
-            <li><strong>Self-Healing:</strong> Continuously monitors cluster state via control loops. If a Pod crashes or is deleted, the ReplicaSet controller automatically provisions a new replacement instance.</li>
-        </ul>
-
-        <div style="margin-top: 12px; margin-bottom: 8px;">
-            <strong style="font-size: 13.5px; color: #b7950b;">Example ReplicaSet Manifest (<code>replicaset-definition.yaml</code>):</strong>
-            <pre style="margin-top: 6px; margin-bottom: 6px;"><code>apiVersion: apps/v1
-kind: ReplicaSet
-metadata:
-  name: myapp-replicaset
-  labels:
-    app: myapp
-    tier: frontend
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      tier: frontend  # Must match template labels below!
-  template:
-    metadata:
-      labels:
-        tier: frontend  # Matched by selector above
-    spec:
-      containers:
-        - name: php-redis
-          image: gcr.io/google_samples/gb-frontend:v3</code></pre>
-        </div>
-    </div>
-
-    <div id="service-section" class="deep-dive-card" style="background-color: #eafaf1; border: 1.5px solid #27ae60;">
-        <h4 style="color: #1e8449; border-bottom: 1px solid #a9dfbf; padding-bottom: 6px;">🌐 Kubernetes Services Deep Dive (<code>NodePort</code> &amp; <code>ClusterIP</code>)</h4>
-        <ul class="card-list">
-            <li><strong>Role & Need for Services:</strong> Pods are ephemeral with frequently changing IPs. Services provide a stable, consistent abstraction layer and virtual IP to ensure reliable communication.</li>
-            <li><strong>Core Service Types:</strong>
-                <ul style="padding-left:18px;margin-top:4px;margin-bottom:4px;">
-                    <li><code>ClusterIP</code> (Default): Exposes the service on an internal virtual IP accessible only within the cluster. Ideal for internal microservice communication (e.g., Frontend to Backend/Database).</li>
-                    <li><code>NodePort</code>: Exposes a static port (30000–32767) on every node IP, enabling external traffic to reach pods
+</div>
