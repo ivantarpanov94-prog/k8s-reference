@@ -42,11 +42,10 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             border: 1px solid #e1e8ed;
         }
-        /* Top Navigation Bar */
         .nav-bar {
             display: flex;
             gap: 10px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             border-bottom: 2px solid #f0f0f0;
             padding-bottom: 15px;
         }
@@ -60,14 +59,28 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        .nav-btn:hover {
-            background: #cbd5e1;
+        .nav-btn:hover { background: #cbd5e1; }
+        .nav-btn.active { background: var(--primary); color: white; }
+
+        /* Search Bar Styling */
+        .search-container {
+            margin-bottom: 25px;
         }
-        .nav-btn.active {
-            background: var(--primary);
-            color: white;
+        .search-input {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 14.5px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 6px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
         }
-        /* Shared Styles for Modules & Diagram */
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.15);
+        }
+
         h2, h3, h4 { margin-top: 0; }
         .section-title { color: var(--primary); border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; margin-top: 30px; }
         
@@ -92,7 +105,7 @@
             100% { box-shadow: 0 0 0 0px rgba(26, 115, 232, 0); transform: scale(1); }
         }
 
-        .deep-dive-card { border-radius: 8px; padding: 18px; margin-bottom: 18px; }
+        .deep-dive-card { border-radius: 8px; padding: 18px; margin-bottom: 18px; transition: opacity 0.2s ease; }
         .card-etcd { background-color: var(--etcd-bg); border: 1.5px solid var(--etcd-border); }
         .card-apiserver { background-color: var(--apiserver-bg); border: 1.5px solid var(--apiserver-border); }
         .card-controller { background-color: var(--controller-bg); border: 1.5px solid var(--controller-border); }
@@ -112,9 +125,30 @@
         ul.card-list { padding-left: 18px; font-size: 14px; margin-top: 8px; margin-bottom: 0; line-height: 1.7; }
         .hint-banner { background-color: #e8f4f8; border-left: 4px solid var(--primary); padding: 10px 14px; border-radius: 4px; font-size: 13.5px; margin-bottom: 20px; color: #1a5276; }
 
-        pre { background: #282c34; color: #abb2bf; padding: 12px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 13px; overflow-x: auto; }
-        .cmd-comment { color: #7f8c8d; font-style: italic; }
-        .cmd-text { color: #61afef; }
+        /* Code Block & Quick-Copy Styling */
+        .code-wrapper {
+            position: relative;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+        pre { background: #282c34; color: #abb2bf; padding: 12px; border-radius: 6px; font-family: 'Courier New', Courier, monospace; font-size: 13px; overflow-x: auto; margin: 0; }
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            color: #abb2bf;
+            border: none;
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .copy-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -124,19 +158,20 @@
             Switch between different learning paths below. Your notes stay modular, clean, and infinitely scalable!
         </p>
         
-        <!-- Navigation Tabs -->
         <div class="nav-bar">
             <button class="nav-btn active" id="btn-kubernetes" onclick="loadModule('kubernetes', this)">☸️ Kubernetes</button>
             <button class="nav-btn" id="btn-git" onclick="loadModule('git', this)">🌿 Git Version Control</button>
         </div>
 
-        <!-- Dynamic Content Injection Zone -->
+        <div class="search-container">
+            <input type="text" id="global-search" class="search-input" placeholder="🔍 Filter current module content (e.g. rebase, etcd, kubectl)..." oninput="filterContent()">
+        </div>
+
         <div id="content-viewport"></div>
     </div>
 
     <script>
         async function loadModule(moduleName, clickedBtn) {
-            // Update active states safely (handles both click and window.onload)
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             if (clickedBtn) {
                 clickedBtn.classList.add('active');
@@ -150,27 +185,73 @@
                 if (!response.ok) throw new Error(`Could not load modules/${moduleName}.html`);
                 let htmlContent = await response.text();
                 document.getElementById('content-viewport').innerHTML = htmlContent;
+
+                // Clear search input when switching modules
+                document.getElementById('global-search').value = '';
+
+                // Post-process: Wrap <pre> blocks with quick-copy buttons automatically
+                enhanceCodeBlocks();
             } catch (error) {
                 document.getElementById('content-viewport').innerHTML = `<p style="color: red;">Error loading module: ${error.message}. Make sure you are running via a local server (like VS Code Live Server).</p>`;
             }
         }
 
-        // Global scroll function for interactive SVG diagram jumps
+        function enhanceCodeBlocks() {
+            const viewport = document.getElementById('content-viewport');
+            const preTags = viewport.querySelectorAll('pre');
+            
+            preTags.forEach(pre => {
+                // Prevent wrapping twice if already wrapped
+                if (pre.parentNode.classList && pre.parentNode.classList.contains('code-wrapper')) return;
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'code-wrapper';
+                pre.parentNode.insertBefore(wrapper, pre);
+                wrapper.appendChild(pre);
+
+                const button = document.createElement('button');
+                button.className = 'copy-btn';
+                button.innerText = 'Copy';
+                button.onclick = () => {
+                    navigator.clipboard.writeText(pre.innerText).then(() => {
+                        button.innerText = 'Copied!';
+                        setTimeout(() => { button.innerText = 'Copy'; }, 2000);
+                    });
+                };
+                wrapper.appendChild(button);
+            });
+        }
+
+        function filterContent() {
+            const query = document.getElementById('global-search').value.toLowerCase();
+            const viewport = document.getElementById('content-viewport');
+            
+            // Target cards, list items, or general text blocks
+            const cards = viewport.querySelectorAll('.deep-dive-card, .diagram-container, h3, h4');
+
+            cards.forEach(card => {
+                const text = card.innerText.toLowerCase();
+                if (text.includes(query) || query === '') {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
         function scrollToSection(sectionId) {
             const element = document.getElementById(sectionId);
             if (element) {
                 element.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 element.classList.remove('card-highlight');
-                void element.offsetWidth; // Trigger reflow to restart animation
+                void element.offsetWidth;
                 element.classList.add('card-highlight');
             } else {
                 console.warn(`Target section with ID "${sectionId}" was not found on the page.`);
             }
         }
 
-        window.onload = () => {
-            loadModule('kubernetes');
-        };
+        window.onload = () => { loadModule('kubernetes'); };
     </script>
 </body>
 </html>

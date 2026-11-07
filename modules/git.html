@@ -1,60 +1,127 @@
-<div>
-    <h3 class="section-title">🌿 Version Control & Collaboration Guide (Git)</h3>
-    <p style="font-size: 14.5px; color: #475569; margin-bottom: 20px;">
-        Summary of core concepts, workflows, and essential command references for Git version control (Lectures 1–19).
-    </p>
+<h3 class="section-title">🌿 Git Version Control Reference</h3>
+<p style="color: #64748b; font-size: 14.5px; margin-bottom: 20px;">
+    Essential commands, core lifecycle operations, branching workflows, and conflict management for your daily DevOps engineering.
+</p>
 
-    <h4 style="color: var(--primary); margin-top: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">Core Concepts & Lectures Summary</h4>
-    <ul style="font-size: 14.5px; line-height: 1.7; padding-left: 20px;">
-        <li><strong>Fundamentals & Setup:</strong> Overview of Git, installation, configuration, initializing repositories (<code>git init</code>), staging (<code>git add</code>), and committing (<code>git commit</code>).</li>
-        <li><strong>Branching & Merging:</strong> Managing branches (<code>git branch</code>, <code>git checkout</code> / <code>git switch</code>), merging code safely, and handling merge conflicts (<code>git merge --abort</code>).</li>
-        <li><strong>Collaboration & Remotes:</strong> Remote repositories, cloning (<code>git clone</code>), fetching (<code>git fetch</code>), pushing (<code>git push</code>), and utilizing pull requests.</li>
-        <li><strong>Advanced Utilities:</strong> Temporary work stashing (<code>git stash</code>), release tagging (<code>git tag</code>), and pattern exclusion via <code>.gitignore</code>.</li>
+<!-- 1. Core Lifecycle & Remote Commands -->
+<div class="deep-dive-card" style="background-color: #f8fafc; border: 1.5px solid #cbd5e1; margin-bottom: 18px;">
+    <h4 style="color: var(--primary); border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px;">⚙️ 1. Core Lifecycle & Remote Commands</h4>
+    <p style="font-size: 14px; margin-bottom: 10px;">The foundational commands used to initialize repositories, stage changes, commit history, and sync with remotes:</p>
+    <ul class="card-list" style="margin-bottom: 12px;">
+        <li><strong>Initialize or Clone:</strong> Start a new local repository or clone an existing remote one.
+            <pre># Initialize a new local Git repository
+git init
+
+# Clone an existing repository from remote
+git clone <repository-url></pre>
+        </li>
+        <li><strong>Check Status & Stage Changes:</strong> Inspect working tree status and stage modified or new files.
+            <pre># Check current status of working directory and staging area
+git status
+
+# Stage specific files or all changes
+git add filename.txt
+git add .</pre>
+        </li>
+        <li><strong>Commit Changes:</strong> Record staged changes into the local repository history with a descriptive message.
+            <pre>git commit -m "feat: add initial project structure and documentation"</pre>
+        </li>
+        <li><strong>Push & Pull (Remote Sync):</strong> Send your local commits to a remote repository or fetch and integrate upstream changes.
+            <pre># Push local branch commits to remote repository
+git push origin main
+# (or git push -u origin feature-branch on first push)
+
+# Fetch and merge changes from the remote repository
+git pull origin main</pre>
+        </li>
     </ul>
+</div>
 
-    <h3 class="section-title">🛠️ Essential Git Command Cheatsheet</h3>
-    <pre><code><span class="cmd-comment"># Initialize a new local Git repository</span>
-<span class="cmd-text">git init</span>
+<!-- 2. Managing Files: Add, Edit, Delete -->
+<div class="deep-dive-card" style="background-color: #f8fafc; border: 1.5px solid #cbd5e1; margin-bottom: 18px;">
+    <h4 style="color: var(--primary); border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px;">📁 2. Managing Files (Create, Edit, Delete)</h4>
+    <p style="font-size: 14px; margin-bottom: 10px;">How to manage individual files directly within your working tree:</p>
+    <ul class="card-list" style="margin-bottom: 12px;">
+        <li><strong>Create / Add a new file directly:</strong> Create an empty file via terminal or write content directly.
+            <pre>touch index.html
+# Or write directly into a file:
+echo "Hello DevOps" > README.md</pre>
+        </li>
+        <li><strong>Edit files:</strong> Modify existing files using your favorite editor (e.g., VS Code, nano, vim), then stage the modifications.
+            <pre>nano README.md
+# Stage the edited file for commit:
+git add README.md</pre>
+        </li>
+        <li><strong>Delete files:</strong> Remove files from both the working directory and git tracking.
+            <pre># Delete and stage removal:
+git rm unwanted-file.txt
 
-<span class="cmd-comment"># Stage changes for the next commit</span>
-<span class="cmd-text">git add [file-name]</span>  <span class="cmd-comment"># (or use 'git add .' to stage all changes)</span>
+# Or if already deleted locally, stage all deletions:
+git add -u</pre>
+        </li>
+    </ul>
+</div>
 
-<span class="cmd-comment"># Commit staged changes with a descriptive log message</span>
-<span class="cmd-text">git commit -m "feat: descriptive commit message"</span>
+<!-- 3. Git Log & History Inspection -->
+<div class="deep-dive-card" style="background-color: #f8fafc; border: 1.5px solid #cbd5e1; margin-bottom: 18px;">
+    <h4 style="color: var(--primary); border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px;">📜 3. Git Log & Detailed History</h4>
+    <p style="font-size: 14px; margin-bottom: 10px;">The <code>git log</code> command is essential for reviewing commit history. Adding patch flags provides detailed line-by-line output on what changes were made.</p>
+    <pre># View commit history with detailed patch diffs per commit:
+git log -p
 
-<span class="cmd-comment"># Check the current state of working directory and staged files</span>
-<span class="cmd-text">git status</span>
+# View a compact, one-line graphical history:
+git log --oneline --graph --decorate</pre>
+</div>
 
-<span class="cmd-comment"># List, create, or delete branches</span>
-<span class="cmd-text">git branch</span>  <span class="cmd-comment"># (list) / git branch [branch-name] (create)</span>
+<!-- 4. Merge Requests & Branching Workflows -->
+<div class="deep-dive-card" style="background-color: #f8fafc; border: 1.5px solid #cbd5e1; margin-bottom: 18px;">
+    <h4 style="color: var(--primary); border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px;">🔀 4. Branches & Merge Requests</h4>
+    <p style="font-size: 14px; margin-bottom: 10px;">When creating a merge request, you create a feature branch, push it to remote, and open a request to merge into master/main. Always sync your local branch afterward.</p>
+    <pre># Create and switch to a new feature branch:
+git checkout -b feature/new-dashboard
+# (or: git switch -c feature/new-dashboard)
 
-<span class="cmd-comment"># Switch to an existing branch</span>
-<span class="cmd-text">git checkout [branch-name]</span>  <span class="cmd-comment"># (or git switch [branch-name])</span>
+# Push branch to remote repository:
+git push -u origin feature/new-dashboard
 
-<span class="cmd-comment"># Merge changes from a target branch into your active branch</span>
-<span class="cmd-text">git merge [branch-name]</span>
+# After your Merge Request is approved and merged:
+git checkout main
+git pull origin main</pre>
+</div>
 
-<span class="cmd-comment"># Abort an active merge process if unresolved conflicts occur</span>
-<span class="cmd-text">git merge --abort</span>
+<!-- 5. Rebasing -->
+<div class="deep-dive-card" style="background-color: #f8fafc; border: 1.5px solid #cbd5e1; margin-bottom: 18px;">
+    <h4 style="color: var(--primary); border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px;">📈 5. Rebasing Your Branch</h4>
+    <p style="font-size: 14px; margin-bottom: 10px;">Rebasing your branch means taking your local changes and replaying them on top of the latest main branch. This maintains a clean, linear project history and simplifies merging.</p>
+    <pre># Update your local main and rebase your current feature branch:
+git checkout main
+git pull origin main
+git checkout feature/new-dashboard
+git rebase main</pre>
+</div>
 
-<span class="cmd-comment"># View line-by-line diffs of unstaged or uncommitted changes</span>
-<span class="cmd-text">git diff</span>
+<!-- 6. Resolving Conflicts -->
+<div class="deep-dive-card" style="background-color: #f8fafc; border: 1.5px solid #cbd5e1; margin-bottom: 18px;">
+    <h4 style="color: var(--primary); border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px;">⚠️ 6. Resolving Merge Conflicts</h4>
+    <p style="font-size: 14px; margin-bottom: 10px;">When changes in your branch conflict with main, Git pauses the merge/rebase so you can resolve them manually.</p>
+    <pre># 1. Check which files have conflicts:
+git status
 
-<span class="cmd-comment"># View the repository commit history log</span>
-<span class="cmd-text">git log --oneline --graph</span>
+# 2. Open conflicted files, remove conflict markers (<<<<<<<, =======, >>>>>>>), 
+# and keep the desired code.
 
-<span class="cmd-comment"># Clone a remote repository down to your local machine</span>
-<span class="cmd-text">git clone [repository-url]</span>
+# 3. Stage resolved files and continue:
+git add <resolved-file>
+git rebase --continue   # (or git merge --continue)</pre>
+</div>
 
-<span class="cmd-comment"># Download objects and refs from a remote repository</span>
-<span class="cmd-text">git fetch</span>
+<!-- 7. Rollback Changes -->
+<div class="deep-dive-card" style="background-color: #f8fafc; border: 1.5px solid #cbd5e1; margin-bottom: 18px;">
+    <h4 style="color: var(--primary); border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px;">⎌ 7. Rollback & Reverting Changes</h4>
+    <p style="font-size: 14px; margin-bottom: 10px;">If you need to safely undo a published commit without rewriting public history, use <code>git revert</code> after locating the commit ID via <code>git log</code>.</p>
+    <pre># Find commit hash:
+git log --oneline
 
-<span class="cmd-comment"># Upload local branch commits to a remote repository</span>
-<span class="cmd-text">git push origin [branch-name]</span>
-
-<span class="cmd-comment"># Temporarily stash uncommitted changes to work on something else</span>
-<span class="cmd-text">git stash</span>  <span class="cmd-comment"># (restore later with 'git stash pop')</span>
-
-<span class="cmd-comment"># Create a lightweight or annotated tag for a specific release commit</span>
-<span class="cmd-text">git tag v1.0.0</span></code></pre>
+# Create a new commit that reverses the specified commit:
+git revert <commit-id></pre>
 </div>
