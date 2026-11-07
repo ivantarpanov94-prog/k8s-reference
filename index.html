@@ -45,7 +45,7 @@
         .nav-bar {
             display: flex;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             border-bottom: 2px solid #f0f0f0;
             padding-bottom: 15px;
         }
@@ -61,25 +61,6 @@
         }
         .nav-btn:hover { background: #cbd5e1; }
         .nav-btn.active { background: var(--primary); color: white; }
-
-        /* Search Bar Styling */
-        .search-container {
-            margin-bottom: 25px;
-        }
-        .search-input {
-            width: 100%;
-            padding: 10px 14px;
-            font-size: 14.5px;
-            border: 1.5px solid #cbd5e1;
-            border-radius: 6px;
-            box-sizing: border-box;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .search-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.15);
-        }
 
         h2, h3, h4 { margin-top: 0; }
         .section-title { color: var(--primary); border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; margin-top: 30px; }
@@ -105,7 +86,7 @@
             100% { box-shadow: 0 0 0 0px rgba(26, 115, 232, 0); transform: scale(1); }
         }
 
-        .deep-dive-card { border-radius: 8px; padding: 18px; margin-bottom: 18px; transition: opacity 0.2s ease; }
+        .deep-dive-card { border-radius: 8px; padding: 18px; margin-bottom: 18px; }
         .card-etcd { background-color: var(--etcd-bg); border: 1.5px solid var(--etcd-border); }
         .card-apiserver { background-color: var(--apiserver-bg); border: 1.5px solid var(--apiserver-border); }
         .card-controller { background-color: var(--controller-bg); border: 1.5px solid var(--controller-border); }
@@ -163,10 +144,6 @@
             <button class="nav-btn" id="btn-git" onclick="loadModule('git', this)">🌿 Git Version Control</button>
         </div>
 
-        <div class="search-container">
-            <input type="text" id="global-search" class="search-input" placeholder="🔍 Filter current module content (e.g. rebase, etcd, kubectl)..." oninput="filterContent()">
-        </div>
-
         <div id="content-viewport"></div>
     </div>
 
@@ -186,9 +163,6 @@
                 let htmlContent = await response.text();
                 document.getElementById('content-viewport').innerHTML = htmlContent;
 
-                // Clear search input when switching modules
-                document.getElementById('global-search').value = '';
-
                 // Post-process: Wrap <pre> blocks with quick-copy buttons automatically
                 enhanceCodeBlocks();
             } catch (error) {
@@ -201,7 +175,6 @@
             const preTags = viewport.querySelectorAll('pre');
             
             preTags.forEach(pre => {
-                // Prevent wrapping twice if already wrapped
                 if (pre.parentNode.classList && pre.parentNode.classList.contains('code-wrapper')) return;
 
                 const wrapper = document.createElement('div');
@@ -219,23 +192,6 @@
                     });
                 };
                 wrapper.appendChild(button);
-            });
-        }
-
-        function filterContent() {
-            const query = document.getElementById('global-search').value.toLowerCase();
-            const viewport = document.getElementById('content-viewport');
-            
-            // Target cards, list items, or general text blocks
-            const cards = viewport.querySelectorAll('.deep-dive-card, .diagram-container, h3, h4');
-
-            cards.forEach(card => {
-                const text = card.innerText.toLowerCase();
-                if (text.includes(query) || query === '') {
-                    card.style.display = '';
-                } else {
-                    card.style.display = 'none';
-                }
             });
         }
 
